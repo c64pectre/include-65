@@ -347,6 +347,125 @@
     ldwv DX, (value)
 .endmacro
 
+;;; summary: Clear A
+;;; result: A = 0
+;;; changed: A, N0 , Z1
+.macro clra
+    ldav 0
+.endmacro
+
+;;; summary: Clear X
+;;; result: X = 0
+;;; changed: X, N0 , Z1
+.macro clrx
+    ldxv 0
+.endmacro
+
+;;; summary: Clear Y
+;;; result: Y = 0
+;;; changed: Y, N0 , Z1
+.macro clry
+    ldyv 0
+.endmacro
+
+;;; summary: Clear Byte memory
+;;; result: [M]:b = 0
+;;; changed: [M], N0 , Z1
+.macro clrb M
+    ldbv M, 0
+.endmacro
+
+;;; summary: Clear Word memory
+;;; result: [M]:w = 0
+;;; changed: [M], N0 , Z1
+.macro clrw M
+    ldwv M, 0
+.endmacro
+
+;;; summary: Clear AL
+;;; result: AL = 0
+;;; changed: AL, N0 , Z1
+.macro clral
+    clrb AL
+.endmacro
+
+;;; summary: Clear AH
+;;; result: AH = 0
+;;; changed: AH, N0 , Z1
+.macro clrah
+    clrb AH
+.endmacro
+
+;;; summary: Clear AX
+;;; result: AX = 0
+;;; changed: AX, N0 , Z1
+.macro clrax
+    clrw AX
+.endmacro
+
+;;; summary: Clear BL
+;;; result: BL = 0
+;;; changed: BL, N0 , Z1
+.macro clrbl
+    clrb BL
+.endmacro
+
+;;; summary: Clear BH
+;;; result: BH = 0
+;;; changed: BH, N0 , Z1
+.macro clrbh
+    clrb BH
+.endmacro
+
+;;; summary: Clear BX
+;;; result: BX = 0
+;;; changed: BX, N0 , Z1
+.macro clrbx
+    clrw BX
+.endmacro
+
+;;; summary: Clear CL
+;;; result: CL = 0
+;;; changed: CL, N0 , Z1
+.macro clrcl
+    clrb CL
+.endmacro
+
+;;; summary: Clear CH
+;;; result: CH = 0
+;;; changed: CH, N0 , Z1
+.macro clrch
+    clrb CH
+.endmacro
+
+;;; summary: Clear CX
+;;; result: CX = 0
+;;; changed: CX, N0 , Z1
+.macro clrcx
+    clrw CX
+.endmacro
+
+;;; summary: Clear DL
+;;; result: DL = 0
+;;; changed: DL, N0 , Z1
+.macro clrdl
+    clrb DL
+.endmacro
+
+;;; summary: Clear DH
+;;; result: DH = 0
+;;; changed: DH, N0 , Z1
+.macro clrdh
+    clrb DH
+.endmacro
+
+;;; summary: Clear DX
+;;; result: DX = 0
+;;; changed: DX, N0 , Z1
+.macro clrdx
+    clrw DX
+.endmacro
+
 ; ==============================================================================
 ; Synthetic instuctions - Load
 ; ==============================================================================

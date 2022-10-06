@@ -147,20 +147,23 @@
 ;;;     Midnight (end of day) shown as start of next day
 ;;;   Conversion table for CIA_TOD_HR from 12-hour clock to 24-hour clock and v.v.:
 ;;;   -------+-----+------+------+------------+-----------------
-;;;   C12    | C24 | >>>> | <<<< | CIA_TOD_HR | CONDITIONS
+;;;   H12    | H24 | >>>> | <<<< | CIA_TOD_HR | CONDITIONS
 ;;;   -------+-----+------+------+------------+-----------------
-;;;   $12 AM | $00 | +$12 | -$12 | $12        | bpl ; < $12 else
+;;;   $12 AM | $00 |  $00 |  $92 | $12        | bpl ; < $12 else
 ;;;   -------+-----+------+------+------------+-----------------
 ;;;   $01 AM | $01 | +$00 | -$00 | $01        | bpl ; < $12 then
 ;;;   ...
 ;;;   $11 AM | $11 | +$00 | -$00 | $11        | bpl ; < $12 then
 ;;;   -------+-----+------+------+------------+-----------------
-;;;   $12 PM | $12 | +$80 | -$80 | $92        | bmi ; < $92 else
+;;;   $12 PM | $12 |  $00 |  $12 | $92        | bmi ; < $92 else
 ;;;   -------+-----+------+------+------------+-----------------
 ;;;   $01 PM | $13 | +$68 | -$68 | $81        | bmi ; < $92 then
 ;;;   ...
 ;;;   $11 PM | $23 | +$68 | -$68 | $91        | bmi ; < $92 then
 ;;;   -------+-----+------+------+------------+-----------------
+;;;   To write 12 PM (is 12 [24]) to TOD_HR, you need to write $12, because the AM/PM bit is flipped and $92 is stored and read.
+;;;   To write 12 AM (is 00 [24]) to TOD_HR, you need to write $92, because the AM/PM bit is flipped and $12 is stored and read.
+
 
 CIA_R00   =  0
 CIA_R01   =  1
@@ -350,10 +353,15 @@ CIA_TOD_HR_AMPM_MASK_SET_PM = %10000000
 ;; summary: Offset from AM to PM is 12 hours bcd (and v.v.)
 CIA_TOD_HR_AMPM_OFFSET = $12
 
+CIA_TOD_MIN_HR_24   = $00  ; bcd
 CIA_TOD_MAX_HR_24   = $23  ; bcd
+CIA_TOD_MIN_HR_AMPM = $01  ; bcd
 CIA_TOD_MAX_HR_AMPM = $12  ; bcd
+CIA_TOD_MIN_MIN     = $00  ; bcd
 CIA_TOD_MAX_MIN     = $59  ; bcd
+CIA_TOD_MIN_SEC     = $00  ; bcd
 CIA_TOD_MAX_SEC     = $59  ; bcd
+CIA_TOD_MIN_10THS   = $00  ; bcd
 CIA_TOD_MAX_10THS   = $09  ; bcd
 
 CIA_ICR_TIMER_A   = 0
