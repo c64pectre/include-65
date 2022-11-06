@@ -38,6 +38,12 @@
     .endscope
 .endmacro
 
+.macro if_then scope
+    .scope scope
+    _if:
+    _then:
+.endmacro
+
 .macro else_end
     _else:
     _end:
@@ -132,6 +138,20 @@
 
 .macro next
     _next:
+.endmacro
+
+;;; summary: switch-case-end
+.macro switch scope
+    .scope scope
+    _switch:
+.endmacro
+
+.macro case label
+    label:
+.endmacro
+
+.macro default
+    _default:
 .endmacro
 
 .endif

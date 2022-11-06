@@ -499,7 +499,7 @@
 ;;; result: AH <- [source]
 ;;; changed: A , N+ , Z+
 .macro ldah source
-    ldb AL, (source)
+    ldb AH, (source)
 .endmacro
 
 ;;; summary: LoaD AX from word source
@@ -1317,6 +1317,16 @@
 ; ==============================================================================
 ; Synthetic instuctions - Math
 ; ==============================================================================
+
+;;; summary: Reverse subtract A Value
+;;; result: A <- V - A
+;;; bytes: 5-6
+;;; cycles: 4-10
+.macro revsubav V
+    oca
+    sec
+    adc # V
+.endmacro
 
 ;;; summary: Reverse subtract A memory Byte
 ;;; result: A <- [M] - A

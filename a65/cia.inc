@@ -192,6 +192,7 @@ CIA_TA_LO     = CIA_R04
 CIA_TA_HI     = CIA_R05
 CIA_TB_LO     = CIA_R06
 CIA_TB_HI     = CIA_R07
+CIA_TOD       = CIA_R08                                     ; Base
 CIA_TOD_10THS = CIA_R08
 CIA_TOD_SEC   = CIA_R09
 CIA_TOD_MIN   = CIA_R0A
@@ -363,6 +364,8 @@ CIA_TOD_MIN_SEC     = $00  ; bcd
 CIA_TOD_MAX_SEC     = $59  ; bcd
 CIA_TOD_MIN_10THS   = $00  ; bcd
 CIA_TOD_MAX_10THS   = $09  ; bcd
+
+CIA_TOD_LENGTH = 4  ; bytes
 
 CIA_ICR_TIMER_A   = 0
 CIA_ICR_TIMER_B   = 1
