@@ -21,12 +21,18 @@
 ; ==============================================================================
 ; Kernal revision 3 Public interface
 ;
+; See ca65/c64/kernal.export.asm for addresses.
+;
 ; You can check for the required kernal revision in your program with
 ;   lda KERNAL_REVISION
 ;   ASSERT_A_EQ(KERNAL_REVISION_3)
 ; ==============================================================================
 
-KERNAL_ACTUAL_REVISION = $FF80
+; ==============================================================================
+; Configuration
+; ==============================================================================
+
+;KERNAL_ACTUAL_REVISION = $FF80
 
 KERNAL_REVISION_1 = 1
 KERNAL_REVISION_2 = 2
@@ -34,59 +40,59 @@ KERNAL_REVISION_3 = 3
 
 KERNAL_CURRENT_REVISION = KERNAL_REVISION_3
 
-KERNAL_ORG = $E000
+;KERNAL_ORG = $E000
 
 ; ==============================================================================
 ; Entry points KERNAL_*
 ; ==============================================================================
 
-KERNAL_CINT   = $FF81  ; -> pcint    = $FF5B
-KERNAL_IOINIT = $FF84  ; -> ioinit   = $FDA3
-KERNAL_RAMTAS = $FF87  ; -> ramtas   = $FD50
-KERNAL_RESTOR = $FF8A  ; -> restor   = $FD15
-KERNAL_VECTOR = $FF8D  ; -> vector   = $FD1A
-KERNAL_SETMSG = $FF90  ; -> setmsg   = $FE18
-KERNAL_SECOND = $FF93  ; -> secnd    = $EDB9
-KERNAL_TKSA   = $FF96  ; -> tksa     = $EDC7
-KERNAL_MEMTOP = $FF99  ; -> memtop   = $FE25                     ; set/read top of memory
-KERNAL_MEMBOT = $FF9C  ; -> membot   = $FE34                     ; set/read bottom of memory
-KERNAL_SCNKEY = $FF9F  ; -> scnkey   = $EA87                     ; scan keyboard
-KERNAL_SETTMO = $FFA2  ; -> settmo   = $FE21                     ; set timeout in ieee
-KERNAL_ACPTR  = $FFA5  ; -> acptr    = $EE13                     ; handshake ieee byte in
-KERNAL_CIOUT  = $FFA8  ; -> ciout    = $EDDD                     ; handshake ieee byte out
-KERNAL_UNTLK  = $FFAB  ; -> untlk    = $EDEF                     ; send untalk out ieee
-KERNAL_UNLSN  = $FFAE  ; -> unlsn    = $EDFE                     ; send unlisten out ieee
-KERNAL_LISTEN = $FFB1  ; -> listn    = $ED0C                     ; send listen out ieee
-KERNAL_TALK   = $FFB4  ; -> talk     = $ED09                     ; send talk out ieee
-KERNAL_READST = $FFB7  ; -> readss   = $FE07                     ; return i/o status byte
-KERNAL_SETLFS = $FFBA  ; -> setlfs   = $FE00                     ; set la, fa, sa
-KERNAL_SETNAM = $FFBD  ; -> setnam   = $FDF9                     ; set length and fn adr
-KERNAL_OPEN   = $FFC0  ; -> [iopen]  = [$031A] = nopen  = $F34A
-KERNAL_CLOSE  = $FFC3  ; -> [iclose] = [$031C] = nclose = $F291
-KERNAL_CHKIN  = $FFC6  ; -> [ichkin] = [$031E] = nchkin = $F20E
-KERNAL_CHKOUT = $FFC9  ; -> [ickout] = [$0320] = nckout = $F250
-KERNAL_CLRCHN = $FFCC  ; -> [iclrch] = [$0322] = nclrch = $F333  ; close i/o channel
-KERNAL_CHRIN  = $FFCF  ; -> [ibasin] = [$0324] = nbasin = $F157  ; input from channel
-KERNAL_CHROUT = $FFD2  ; -> [ibsout] = [$0326] = nbsout = $F1CA  ; output to channel
-KERNAL_LOAD   = $FFD5  ; -> loadsp   = $F49E                     ; load from file
-KERNAL_SAVE   = $FFD8  ; -> savesp   = $F5DD                     ; save to file
-KERNAL_SETTIM = $FFDB  ; -> settim   = $F6E4                     ; set internal clock
-KERNAL_RDTIM  = $FFDE  ; -> rdtim    = $F6DD                     ; read internal clock
-KERNAL_STOP   = $FFE1  ; -> [istop]  = [$0328] = nstop  = $F6ED  ; scan stop key
-KERNAL_GETIN  = $FFE4  ; -> [igetin] = [$032A] = ngetin = $F13E  ; get char from q
-KERNAL_CLALL  = $FFE7  ; -> [iclall] = [$032C] = nclall = $F32F  ; close all files
-KERNAL_UDTIM  = $FFEA  ; -> udtim    = $F69B                     ; increment clock
-KERNAL_SCREEN = $FFED  ; -> scrorg   = $E505                     ; screen org
-KERNAL_PLOT   = $FFF0  ; -> plot     = $E50A                     ; read/set x,y coord
-KERNAL_IOBASE = $FFF3  ; -> iobase   = $E500                     ; return i/o base
+;KERNAL_CINT   = $FF81  ; -> pcint    = $FF5B
+;KERNAL_IOINIT = $FF84  ; -> ioinit   = $FDA3
+;KERNAL_RAMTAS = $FF87  ; -> ramtas   = $FD50
+;KERNAL_RESTOR = $FF8A  ; -> restor   = $FD15
+;KERNAL_VECTOR = $FF8D  ; -> vector   = $FD1A
+;KERNAL_SETMSG = $FF90  ; -> setmsg   = $FE18
+;KERNAL_SECOND = $FF93  ; -> secnd    = $EDB9
+;KERNAL_TKSA   = $FF96  ; -> tksa     = $EDC7
+;KERNAL_MEMTOP = $FF99  ; -> memtop   = $FE25                     ; set/read top of memory
+;KERNAL_MEMBOT = $FF9C  ; -> membot   = $FE34                     ; set/read bottom of memory
+;KERNAL_SCNKEY = $FF9F  ; -> scnkey   = $EA87                     ; scan keyboard
+;KERNAL_SETTMO = $FFA2  ; -> settmo   = $FE21                     ; set timeout in ieee
+;KERNAL_ACPTR  = $FFA5  ; -> acptr    = $EE13                     ; handshake ieee byte in
+;KERNAL_CIOUT  = $FFA8  ; -> ciout    = $EDDD                     ; handshake ieee byte out
+;KERNAL_UNTLK  = $FFAB  ; -> untlk    = $EDEF                     ; send untalk out ieee
+;KERNAL_UNLSN  = $FFAE  ; -> unlsn    = $EDFE                     ; send unlisten out ieee
+;KERNAL_LISTEN = $FFB1  ; -> listn    = $ED0C                     ; send listen out ieee
+;KERNAL_TALK   = $FFB4  ; -> talk     = $ED09                     ; send talk out ieee
+;KERNAL_READST = $FFB7  ; -> readss   = $FE07                     ; return i/o status byte
+;KERNAL_SETLFS = $FFBA  ; -> setlfs   = $FE00                     ; set la, fa, sa
+;KERNAL_SETNAM = $FFBD  ; -> setnam   = $FDF9                     ; set length and fn adr
+;KERNAL_OPEN   = $FFC0  ; -> [iopen]  = [$031A] = nopen  = $F34A
+;KERNAL_CLOSE  = $FFC3  ; -> [iclose] = [$031C] = nclose = $F291
+;KERNAL_CHKIN  = $FFC6  ; -> [ichkin] = [$031E] = nchkin = $F20E
+;KERNAL_CHKOUT = $FFC9  ; -> [ickout] = [$0320] = nckout = $F250
+;KERNAL_CLRCHN = $FFCC  ; -> [iclrch] = [$0322] = nclrch = $F333  ; close i/o channel
+;KERNAL_CHRIN  = $FFCF  ; -> [ibasin] = [$0324] = nbasin = $F157  ; input from channel
+;KERNAL_CHROUT = $FFD2  ; -> [ibsout] = [$0326] = nbsout = $F1CA  ; output to channel
+;KERNAL_LOAD   = $FFD5  ; -> loadsp   = $F49E                     ; load from file
+;KERNAL_SAVE   = $FFD8  ; -> savesp   = $F5DD                     ; save to file
+;KERNAL_SETTIM = $FFDB  ; -> settim   = $F6E4                     ; set internal clock
+;KERNAL_RDTIM  = $FFDE  ; -> rdtim    = $F6DD                     ; read internal clock
+;KERNAL_STOP   = $FFE1  ; -> [istop]  = [$0328] = nstop  = $F6ED  ; scan stop key
+;KERNAL_GETIN  = $FFE4  ; -> [igetin] = [$032A] = ngetin = $F13E  ; get char from q
+;KERNAL_CLALL  = $FFE7  ; -> [iclall] = [$032C] = nclall = $F32F  ; close all files
+;KERNAL_UDTIM  = $FFEA  ; -> udtim    = $F69B                     ; increment clock
+;KERNAL_SCREEN = $FFED  ; -> scrorg   = $E505                     ; screen org
+;KERNAL_PLOT   = $FFF0  ; -> plot     = $E50A                     ; read/set x,y coord
+;KERNAL_IOBASE = $FFF3  ; -> iobase   = $E500                     ; return i/o base
 
 ; ==============================================================================
 ; Signature
 ; ==============================================================================
 
-; KERNAL_ACTUAL_SIGNATURE = $FFF6       ; see kernal-r3-internal.inc
+;;; KERNAL_ACTUAL_SIGNATURE = $FFF6       ; see kernal-r3-internal.inc
 
-; KERNAL_EXPECTED_SIGNATURE "RRBY"
+.define KERNAL_EXPECTED_SIGNATURE "RRBY"
 
 ; ==============================================================================
 ; Constants - Devices
@@ -162,22 +168,29 @@ DEVICE_DISK_CHANNEL_15      = 15
 DEVICE_DISK_CHANNEL_COMMAND = 15
 
 ; ==============================================================================
-; Constants
+; Constants - Serial bus
 ; ==============================================================================
+
+SERIAL_GLOBAL_COMMAND = $00  ; %000nnnnn
+SERIAL_PA_LISTEN      = $20  ; %001nnnnn
+SERIAL_PA_TALK        = $40  ; %010nnnnn
+SERIAL_SA_SECOND      = $60  ; %011nnnnn
+SERIAL_SA_CLOSE       = $E0  ; %1110nnnn
+SERIAL_SA_OPEN        = $F0  ; %1111nnnn
 
 ; ==============================================================================
 ; Constants
 ; ==============================================================================
 
 HIBASE_DEFAULT = $04      ; default hibase base location of screen (top)
-MEMSTR_DEFAULT = $0800    ; default memstr start of memory
-MEMSIZ_DEFAULT = $A000    ; default memsiz top of memory
+;MEMSTR_DEFAULT = $0800    ; default memstr start of memory
+;MEMSIZ_DEFAULT = $A000    ; default memsiz top of memory
 
 ; ==============================================================================
 ; Constants - Tape and IEEE errors
 ; ==============================================================================
 
-ZPKERNAL_STATUS = $90
+;ZPKERNAL_STATUS = $90
 
 KERNAL_IO_ERROR_BIT_0_BIT              = 0
 KERNAL_IO_ERROR_READ_TIMEOUT_BIT       = 1
@@ -245,29 +258,33 @@ KERNAL_LOAD_VERIFY = 1
 ; segment "ZPKERNAL"
 ; ==============================================================================
 
-KERNAL_STATUS = $90      ; i/o operation status byte
-KERNAL_STKEY  = $91      ; stop key flag
-KERNAL_MSGFLG = $9D      ; os message flag
-KERNAL_TIME   = $A0      ; 24 hour clock in 1/60th seconds ($A0-$A2)
+;KERNAL_STATUS = $90      ; i/o operation status byte
+;KERNAL_STKEY  = $91      ; stop key flag
+;KERNAL_MSGFLG = $9D      ; os message flag
+;KERNAL_TIME   = $A0      ; 24 hour clock in 1/60th seconds ($A0-$A2)
 
 ; ==============================================================================
 ; segment "KVECTORS"
 ; ==============================================================================
 
 ; Initialized by vector from table vectss
-KERNAL_CINV   = $0314    ; irq ram vector                  (2 bytes $0314-$0315 default key    = $EA31)
-KERNAL_CBINV  = $0316    ; brk instr ram vector            (2 bytes $0316-$0317 default timb   = $FE66)
-KERNAL_NMINV  = $0318    ; nmi ram vector                  (2 bytes $0318-$0319 default nnmi   = $FE47)
-KERNAL_IOPEN  = $031A    ; indirects for code              (2 bytes $031A-$031B default nopen  = $F34A)
-KERNAL_ICLOSE = $031C    ; conforms to kernal spec 8/19/80 (2 bytes $031C-$031D default nclose = $F291)
-KERNAL_ICHKIN = $031E    ;                                 (2 bytes $031E-$031F default nchkin = $F20E)
-KERNAL_ICKOUT = $0320    ;                                 (2 bytes $0320-$0321 default nckout = $F250)
-KERNAL_ICLRCH = $0322    ;                                 (2 bytes $0322-$0323 default nclrch = $F333)
-KERNAL_IBASIN = $0324    ;                                 (2 bytes $0324-$0325 default nbasin = $F157)
-KERNAL_IBSOUT = $0326    ;                                 (2 bytes $0326-$0327 default nbsout = $F1CA)
-KERNAL_ISTOP  = $0328    ;                                 (2 bytes $0328-$0329 default nstop  = $F6ED)
-KERNAL_IGETIN = $032A    ;                                 (2 bytes $032A-$032B default ngetin = $F13E)
-KERNAL_ICLALL = $032C    ;                                 (2 bytes $032C-$032D default nclall = $F32F)
-KERNAL_USRCMD = $032E    ;                                 (2 bytes $032E-$032F default timb   = $FE66)
-KERNAL_ILOAD  = $0330    ;                                 (2 bytes $0330-$0331 default nload  = $F4A5)
-KERNAL_ISAVE  = $0332    ; savesp                          (2 bytes $0332-$0333 default nsave  = $F5ED)
+;KERNAL_CINV   = $0314    ; irq ram vector                  (2 bytes $0314-$0315 default key    = $EA31)
+;KERNAL_CBINV  = $0316    ; brk instr ram vector            (2 bytes $0316-$0317 default timb   = $FE66)
+;KERNAL_NMINV  = $0318    ; nmi ram vector                  (2 bytes $0318-$0319 default nnmi   = $FE47)
+;KERNAL_IOPEN  = $031A    ; indirects for code              (2 bytes $031A-$031B default nopen  = $F34A)
+;KERNAL_ICLOSE = $031C    ; conforms to kernal spec 8/19/80 (2 bytes $031C-$031D default nclose = $F291)
+;KERNAL_ICHKIN = $031E    ;                                 (2 bytes $031E-$031F default nchkin = $F20E)
+;KERNAL_ICKOUT = $0320    ;                                 (2 bytes $0320-$0321 default nckout = $F250)
+;KERNAL_ICLRCH = $0322    ;                                 (2 bytes $0322-$0323 default nclrch = $F333)
+;KERNAL_IBASIN = $0324    ;                                 (2 bytes $0324-$0325 default nbasin = $F157)
+;KERNAL_IBSOUT = $0326    ;                                 (2 bytes $0326-$0327 default nbsout = $F1CA)
+;KERNAL_ISTOP  = $0328    ;                                 (2 bytes $0328-$0329 default nstop  = $F6ED)
+;KERNAL_IGETIN = $032A    ;                                 (2 bytes $032A-$032B default ngetin = $F13E)
+;KERNAL_ICLALL = $032C    ;                                 (2 bytes $032C-$032D default nclall = $F32F)
+;KERNAL_USRCMD = $032E    ;                                 (2 bytes $032E-$032F default timb   = $FE66)
+;KERNAL_ILOAD  = $0330    ;                                 (2 bytes $0330-$0331 default nload  = $F4A5)
+;KERNAL_ISAVE  = $0332    ; savesp                          (2 bytes $0332-$0333 default nsave  = $F5ED)
+
+; ==============================================================================
+; End of Kernal revision 3 Public interface
+; ==============================================================================

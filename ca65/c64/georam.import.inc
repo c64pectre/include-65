@@ -16,6 +16,25 @@
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
 
-.export GEORAM_PAGE
-.export GEORAM_BANK_SELECT
-.export GEORAM_PAGE_SELECT
+.ifndef __C64_GEORAM_IMPORT_INC__
+    __C64_GEORAM_IMPORT_INC__ = 1
+
+;;; summary: Selected 256B page
+.import GEORAM_PAGE := $DE00  # IO_AREA_1_BASE
+
+;;; summary: GEORAM registers
+.import GEORAM_REGISTER_BASE := $DF00  # IO_AREA_2_BASE
+
+;;; summary: Select page in bank GEORAM_PAGE_MIN -- GEORAM_PAGE_MAX(0 -- 63 = $0 -- $3f)
+;;; notes: write-only
+.import GEORAM_PAGE_SELECT := GEORAM_REGISTER_BASE + $FE
+
+;;; summary: Select 16KB bank, write-only
+;;; notes:
+;;;    512KB: GEORAM_BANK_MIN -- GEORAM_BANK_MAX_512KB  (0 --  31 = $0 -- $1F)
+;;;   1024KB: GEORAM_BANK_MIN -- GEORAM_BANK_MAX_1024KB (0 --  63 = $0 -- $3F)
+;;;   2048KB: GEORAM_BANK_MIN -- GEORAM_BANK_MAX_2048KB (0 -- 127 = $0 -- $7F)
+;;;   4096KB: GEORAM_BANK_MIN -- GEORAM_BANK_MAX_4096KB (0 -- 255 = $0 -- $FF)
+.import GEORAM_BANK_SELECT := GEORAM_REGISTER_BASE + $FF
+
+.endif

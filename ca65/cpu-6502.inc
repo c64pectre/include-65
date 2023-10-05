@@ -19,6 +19,7 @@
 .ifndef __CPU_6502_INC__
   __CPU_6502_INC__ = 1
 
+  .include "./cpu-6502.import.inc"
   .include "../a65/cpu-6502.inc"
 
 .endif

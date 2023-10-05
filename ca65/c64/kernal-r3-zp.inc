@@ -16,10 +16,9 @@
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
 
-.ifndef __C64_GEORAM_INC__
-    __C64_GEORAM_INC__ = 1
+.ifndef __C64_KERNAL_R3_ZP_INC__
+    __C64_KERNAL_R3_ZP_INC__ = 1
 
-    .include "../a65/c64/georam.import.inc"
-    .include "../a65/c64/georam.inc"
+.include "./kernal-r3.import.inc"
 
 .endif

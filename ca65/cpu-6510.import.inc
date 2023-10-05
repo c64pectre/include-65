@@ -16,9 +16,10 @@
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
 
-.ifndef __MODULE_INC__
-  __MODULE_INC__ = 1
+.ifndef __CPU_6510_IMPORT_INC__
+    __CPU_6510_IMPORT_INC__ = 1
 
-  .include "../a65/module.inc"
+.importzp CPU_PORT_DIRECTION
+.importzp CPU_PORT_DATA
 
 .endif

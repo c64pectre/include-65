@@ -16,19 +16,14 @@
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
 
-.export CIA_2_PRA
-.export CIA_2_PRB
-.export CIA_2_DDRA
-.export CIA_2_DDRB
-.export CIA_2_TA_LO
-.export CIA_2_TA_HI
-.export CIA_2_TB_LO
-.export CIA_2_TB_HI
-.export CIA_2_TOD_10THS
-.export CIA_2_TOD_SEC
-.export CIA_2_TOD_MIN
-.export CIA_2_TOD_HR
-.export CIA_2_SDR
-.export CIA_2_ICR
-.export CIA_2_CRA
-.export CIA_2_CRB
+.export CPU_VECTOR_NMI    := $FFFA
+.export CPU_VECTOR_NMI_LO := CPU_VECTOR_NMI + 0
+.export CPU_VECTOR_NMI_HI := CPU_VECTOR_NMI + 1
+
+.export CPU_VECTOR_RES    := $FFFC
+.export CPU_VECTOR_RES_LO := CPU_VECTOR_RES + 0
+.export CPU_VECTOR_RES_HI := CPU_VECTOR_RES + 1
+
+.export CPU_VECTOR_IRQ    := $FFFE
+.export CPU_VECTOR_IRQ_LO := CPU_VECTOR_IRQ + 0
+.export CPU_VECTOR_IRQ_HI := CPU_VECTOR_IRQ + 1

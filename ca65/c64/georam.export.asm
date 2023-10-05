@@ -16,11 +16,8 @@
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
 
-.export AL
-.export AH
-.export BL
-.export BH
-.export CL
-.export CH
-.export DL
-.export DH
+.export GEORAM_PAGE := $DE00  # IO_AREA_1_BASE
+
+.export GEORAM_REGISTER_BASE := $DF00  # IO_AREA_2_BASE
+.export GEORAM_PAGE_SELECT := GEORAM_REGISTER_BASE + $FE
+.export GEORAM_BANK_SELECT := GEORAM_REGISTER_BASE + $FF

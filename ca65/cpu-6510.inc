@@ -19,7 +19,7 @@
 .ifndef __CPU_6510_INC__
   __CPU_6510_INC__ = 1
 
-  .include "cpu-6502.inc"
+  .include "./cpu-6510.import.inc"
   .include "../a65/cpu-6510.inc"
 
 .endif

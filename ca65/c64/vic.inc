@@ -19,7 +19,7 @@
 .ifndef __C64_VIC_INC__
     __C64_VIC_INC__ = 1
 
-    .include "c64/memory-map.inc"
+    .include "./vic.import.inc"
     .include "../a65/c64/vic.inc"
 
 .endif

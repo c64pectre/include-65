@@ -32,6 +32,11 @@
 ;   called with an actual parameter surrounded with parentheses.
 ;   We surround the parameter in the macro body with paranthesis to prevent
 ;   bugs caused by operator precendences.
+;
+;   Do NOT use .scope ... .endscope in macros because this messes up the
+;   recognition of zeropage addressing. E.g. incw AX yields absolute addressing
+;   even though AX is explicitly declared (.zpexport) as zeropage. Instead,
+;   use unnamed labels or .local.
 ; ==============================================================================
 
 .include "cpu-6502.inc"                 ; for phi, pli
@@ -63,16 +68,16 @@
     tay              ; Y = 0
     ldx # REGISTERS_SIZEOF - 1          ; X = 7
     loop_do:
-        sta z:REGISTERS_BASE , x        ; [REGISTERS_BASE + X] = 0
+        sta REGISTERS_BASE , x          ; [REGISTERS_BASE + X] = 0
         dex                             ; X--
         bpl loop_do                     ; X >= 0 ?
     loop_end:
     ;
     ldx # FS                            ; X = FS
-    stx z:FSP                           ; [FSP] = FS
+    stx FSP                             ; [FSP] = FS
     ldx # RS                            ; X = RS
-    stx z:RSP                           ; [RSP] = RS = X
-    stx z:FP                            ; [FP] = RS = X
+    stx RSP                             ; [RSP] = RS = X
+    stx FP                              ; [FP] = RS = X
     ; AX = BX = CX = DX = A = Y = 0 ; X = RSP = FP
 .endmacro
 
@@ -136,12 +141,10 @@
 ;;; cycles: 6-8
 ;;; notes: at adc: C = 1, so will add extra 1.
 .macro rsra
-    .scope
-        lsr
-        bcc skip
-        adc # $80 - 1
-      skip:
-    .endscope
+    lsr
+    bcc :+
+    adc # $80 - 1
+    :
 .endmacro
 
 ;;; summary: Rotate Straight Right  8-bit rotate right Byte in memory
@@ -1343,24 +1346,66 @@
 ;;; bytes: zp: 6 , ab: 8
 ;;; cycles: zp: 12-14 , ab: 14-16
 .macro inw M
-    .scope
-        inc 0 + (M)
-        bne no_inc_hi
-        inc 1 + (M)
-      no_inc_hi:
-    .endscope
+    inc 0 + (M)
+    bne :+
+    inc 1 + (M)
+    :
+.endmacro
+
+;;; summary: INCrement memory Word
+;;; result: [M]:w <- [M]:w + 1
+;;; bytes: zp: 6 , ab: 8
+;;; cycles: zp: 12-14 , ab: 14-16
+.macro incw M
+    inw M
+.endmacro
+
+.macro incax
+    incw AX
+.endmacro
+
+.macro incbx
+    incw BX
+.endmacro
+
+.macro inccx
+    incw CX
+.endmacro
+
+.macro incdx
+    incw DX
 .endmacro
 
 ;;; summary: DEcrement memory Word
 ;;; result: [M]:w <- [M]:w - 1
 .macro dew M
-    .scope
-        lda 0 + (M)
-        bne no_dec_hi
-        dec 1 + (M)
-      no_dec_hi:
-        dec 0 + (M)
-    __enscope
+    lda 0 + (M)
+    bne :+
+    dec 1 + (M)
+    :
+    dec 0 + (M)
+.endmacro
+
+;;; summary: DECrement memory Word
+;;; result: [M]:w <- [M]:w - 1
+.macro decw M
+    dew M
+.endmacro
+
+.macro decax
+    decw AX
+.endmacro
+
+.macro decbx
+    decw BX
+.endmacro
+
+.macro deccx
+    decw CX
+.endmacro
+
+.macro decdx
+    decw DX
 .endmacro
 
 ;;; summary: add to unsigned word the signed byte A
@@ -1368,17 +1413,15 @@
 ;;; see: http://forums.nesdev.com/viewtopic.php?t=10975
 ;;; result: N+ Z+ from UW:hi
 .macro add_uw_sa UW
-    .scope
-        bpl non_negative
-        dec 1 + (UW)
-      non_negative:
-        clc
-        adc 0 + (UW)
-        sta 0 + (UW)
-        bcc no_carry
-        inc 1 + (UW)
-      no_carry:
-    .endscope
+    bpl :+
+    dec 1 + (UW)
+    :
+    clc
+    adc 0 + (UW)
+    sta 0 + (UW)
+    bcc :+
+    inc 1 + (UW)
+    :
 .endmacro
 
 ;;; summary: Add to AL value of A (with clear C)
@@ -2344,15 +2387,11 @@
 ;;;   that there is a possible bug in your program, because some part of the
 ;;;   program might not have been protected by a P.I = 1.
 .macro pli
-    .scope
-        pla
-        if_i:
-            and # CPU_P_I
-            bne if_i_end
-        if_i_then:
-            cli
-        if_i_end:
-    .endscope
+    pla
+    and # CPU_P_I
+    bne :+
+    cli
+    :
 .endmacro
 
 .endif

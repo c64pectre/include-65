@@ -15,17 +15,3 @@
 ;    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
-
-;;; summary: Frame registers:
-;;;   RSP            Register Stack pointer
-;;;   FSP            Frame Stack Pointer
-;;;   FP             Frame Pointer
-;;; notes:
-;;;   Register stack grows upwards from RS.
-;;;   Frame stack grows downwards from FS.
-
-FS  = ZP_3_LAST       ; Top of Frame Stack
-RS  = ZP_5_FIRST      ; Bottom of Register Stack
-RSP = ZP_7_FIRST + 0  ; Register Stack Pointer
-FSP = ZP_8_FIRST + 0  ; Frame Stack Pointer
-FP  = ZP_8_FIRST + 1  ; Frame Pointer

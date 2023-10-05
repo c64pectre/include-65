@@ -154,4 +154,17 @@
     _default:
 .endmacro
 
+.macro try scope
+    .scope scope
+    _try:
+.endmacro
+
+.macro catch
+    _catch:
+.endmacro
+
+.macro finally
+    _finally:
+.endmacro
+
 .endif

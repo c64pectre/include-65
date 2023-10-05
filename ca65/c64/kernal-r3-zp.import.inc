@@ -16,8 +16,20 @@
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
 
-.export FS
-.export RS
-.export RSP
-.export FSP
-.export FP
+.ifndef __C64_KERNAL_R3_ZP_IMPORT_INC__
+    __C64_KERNAL_R3_ZP_IMPORT_INC__ = 1
+
+; ==============================================================================
+; Kernal revision 3 zero page semi-public
+; ==============================================================================
+
+; ==============================================================================
+; segment "ZPKERNAL"
+; ==============================================================================
+
+.importzp KERNAL_STATUS := $90          ; i/o operation status byte
+.importzp KERNAL_STKEY  := $91          ; stop key flag
+.importzp KERNAL_MSGFLG := $9D          ; os message flag
+.importzp KERNAL_TIME   := $A0          ; 24 hour clock in 1/60th seconds ($A0-$A2)
+
+.endif

@@ -19,6 +19,7 @@
 .ifndef __C64_SID_INC__
     __C64_SID_INC__ = 1
 
+    .include "./sid.import.inc"
     .include "../a65/c64/sid.inc"
 
 .endif

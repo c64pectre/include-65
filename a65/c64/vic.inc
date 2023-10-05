@@ -18,106 +18,6 @@
 
 ;;; summary: VIC (VIC-II 6569 PAL)
 
-VIC_R00   = VIC + $00
-VIC_R01   = VIC + $01
-VIC_R02   = VIC + $02
-VIC_R03   = VIC + $03
-VIC_R04   = VIC + $04
-VIC_R05   = VIC + $05
-VIC_R06   = VIC + $06
-VIC_R07   = VIC + $07
-VIC_R08   = VIC + $08
-VIC_R09   = VIC + $09
-VIC_R0A   = VIC + $0A
-VIC_R0B   = VIC + $0B
-VIC_R0C   = VIC + $0C
-VIC_R0D   = VIC + $0D
-VIC_R0E   = VIC + $0E
-VIC_R0F   = VIC + $0F
-VIC_R10   = VIC + $10
-VIC_R11   = VIC + $11
-VIC_R12   = VIC + $12
-VIC_R13   = VIC + $13
-VIC_R14   = VIC + $14
-VIC_R15   = VIC + $15
-VIC_R16   = VIC + $16
-VIC_R17   = VIC + $17
-VIC_R18   = VIC + $18
-VIC_R19   = VIC + $19
-VIC_R1A   = VIC + $1A
-VIC_R1B   = VIC + $1B
-VIC_R1C   = VIC + $1C
-VIC_R1D   = VIC + $1D
-VIC_R1E   = VIC + $1E
-VIC_R1F   = VIC + $1F
-VIC_R20   = VIC + $20
-VIC_R21   = VIC + $21
-VIC_R22   = VIC + $22
-VIC_R23   = VIC + $23
-VIC_R24   = VIC + $24
-VIC_R25   = VIC + $25
-VIC_R26   = VIC + $26
-VIC_R27   = VIC + $27
-VIC_R28   = VIC + $28
-VIC_R29   = VIC + $29
-VIC_R2A   = VIC + $2A
-VIC_R2B   = VIC + $2B
-VIC_R2C   = VIC + $2C
-VIC_R2D   = VIC + $2D
-VIC_R2E   = VIC + $2E
-VIC_FIRST = VIC_R00
-VIC_LAST  = VIC_R2E
-
-; A synonym for sprite is MOB, hence the letter M is used for sprites.
-
-VIC_M0X       = VIC_R00 ; X Coordinate Sprite 0
-VIC_M0Y       = VIC_R01 ; Y Coordinate Sprite 0
-VIC_M1X       = VIC_R02 ; X Coordinate Sprite 1
-VIC_M1Y       = VIC_R03 ; Y Coordinate Sprite 1
-VIC_M2X       = VIC_R04 ; X Coordinate Sprite 2
-VIC_M2Y       = VIC_R05 ; Y Coordinate Sprite 2
-VIC_M3X       = VIC_R06 ; X Coordinate Sprite 3
-VIC_M3Y       = VIC_R07 ; Y Coordinate Sprite 3
-VIC_M4X       = VIC_R08 ; X Coordinate Sprite 4
-VIC_M4Y       = VIC_R09 ; Y Coordinate Sprite 4
-VIC_M5X       = VIC_R0A ; X Coordinate Sprite 5
-VIC_M5Y       = VIC_R0B ; Y Coordinate Sprite 5
-VIC_M6X       = VIC_R0C ; X Coordinate Sprite 6
-VIC_M6Y       = VIC_R0D ; Y Coordinate Sprite 6
-VIC_M7X       = VIC_R0E ; X Coordinate Sprite 7
-VIC_M7Y       = VIC_R0F ; Y Coordinate Sprite 7
-VIC_M07X8     = VIC_R10 ; MSBs of X coordinates
-VIC_CONTROL_1 = VIC_R11 ; Control register 1: 7:RST8 6:ECM 5:BMM 4:DEN 3:RSEL 2-0:YSCROLL
-VIC_RST       = VIC_R12 ; Raster counter
-VIC_LPX       = VIC_R13 ; Light Pen X
-VIC_LPY       = VIC_R14 ; Light Pen Y
-VIC_M07E      = VIC_R15 ; Sprite enabled
-VIC_CONTROL_2 = VIC_R16 ; Control register 2: 7:- 6:- 5:RES 4:MCM 3:CSEL 2-0:XSCROLL
-VIC_M07YE     = VIC_R17 ; Sprite Y expansion
-VIC_MP        = VIC_R18 ; Memory pointers: 7:VM13 6:VM12 5:VM11 4:VM10 3:CB13 2:CB12 1:CB11 0:-
-VIC_IR        = VIC_R19 ; Interrupt register
-VIC_IE        = VIC_R1A ; Interrupt enabled
-VIC_M07DB     = VIC_R1B ; Sprite data priority
-VIC_M07MC     = VIC_R1C ; Sprite multicolor
-VIC_M07XE     = VIC_R1D ; Sprite X expansion
-VIC_M07M      = VIC_R1E ; Sprite-sprite collision
-VIC_M07D      = VIC_R1F ; Sprite-data collision
-VIC_EC        = VIC_R20 ; Border color
-VIC_B0C       = VIC_R21 ; Background color 0
-VIC_B1C       = VIC_R22 ; Background color 1
-VIC_B2C       = VIC_R23 ; Background color 2
-VIC_B3C       = VIC_R24 ; Background color 3
-VIC_MM0       = VIC_R25 ; Sprite multicolor 0
-VIC_MM1       = VIC_R26 ; Sprite multicolor 1
-VIC_M0C       = VIC_R27 ; Color sprite 0
-VIC_M1C       = VIC_R28 ; Color sprite 1
-VIC_M2C       = VIC_R29 ; Color sprite 2
-VIC_M3C       = VIC_R2A ; Color sprite 3
-VIC_M4C       = VIC_R2B ; Color sprite 4
-VIC_M5C       = VIC_R2C ; Color sprite 5
-VIC_M6C       = VIC_R2D ; Color sprite 6
-VIC_M7C       = VIC_R2E ; Color sprite 7
-
 ; VIC_CONTROL_1:
 ; +------+-----+-----+-----+------+---------+
 ; |  7   |  6  |  5  |  4  |  3   |   2-0   |
@@ -180,6 +80,13 @@ VIC_CONTROL_2_XSCROLL_CLR  = %11111000
 VIC_CONTROL_2_XSCROLL_SET  = %00000111
 
 ; VIC_MP:
+; +-------+-------+-------+-------+-------+-------+-------+-------+
+; |   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
+; +-------+-------+-------+-------+-------+-------+-------+-------+
+; | VM.13 | VM.12 | VM.11 | VM.10 | CB.13 | CB.12 | CB.11 |   -   |
+; +-------+-------+-------+-------+-------+-------+-------+-------+
+; VM = Video Matrix for text mode bit 10-13 (1KB blocks)
+; CB = Character Base bit 11-13 (2KB blocks)
 VIC_MP_VM_SET = %11110000
 VIC_MP_VM_CLR = %00001111
 VIC_MP_CB_SET = %00001110
@@ -224,10 +131,6 @@ VIC_IE_LP_SET  = %00001000
 VIC_IE_LP_CLR  = %11110111
 
 VIC_BANK_SIZE         = $4000
-VIC_BANK_0            = $0000
-VIC_BANK_1            = $4000
-VIC_BANK_2            = $8000
-VIC_BANK_3            = $C000
 ; See also cia-2.inc:CIA_2_PRA_SELECT_VIC_BANK_*
 
 VIC_DEFAULT_BANK      = 0

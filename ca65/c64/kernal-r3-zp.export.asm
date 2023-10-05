@@ -16,32 +16,17 @@
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
 
-.export SID_V1_FREQ_LO
-.export SID_V1_FREQ_HI
-.export SID_V1_PWDC_LO
-.export SID_V1_PWDC_HI
-.export SID_V1_CONTROL
-.export SID_V1_ATT_DEC
-.export SID_V1_SUS_REL
-.export SID_V2_FREQ_LO
-.export SID_V2_FREQ_HI
-.export SID_V2_PWDC_LO
-.export SID_V2_PWDC_HI
-.export SID_V2_CONTROL
-.export SID_V2_ATT_DEC
-.export SID_V2_SUS_REL
-.export SID_V3_FREQ_LO
-.export SID_V3_FREQ_HI
-.export SID_V3_PWDC_LO
-.export SID_V3_PWDC_HI
-.export SID_V3_CONTROL
-.export SID_V3_ATT_DEC
-.export SID_V3_SUS_REL
-.export SID_F_CUTOFF_FREQ_LO
-.export SID_F_CUTOFF_FREQ_HI
-.export SID_F_RESN_ROUT
-.export SID_F_MODE_MAIN_VOL
-.export SID_PADDLE_X_READ
-.export SID_PADDLE_Y_READ
-.export SID_V3_OSC_READ
-.export SID_V3_ENV_READ
+;;; summary: C64 Kernal revision 3 internals
+
+; ==============================================================================
+; Kernal revision 3 zero page semi-public
+; ==============================================================================
+
+; ==============================================================================
+; segment "ZPKERNAL"
+; ==============================================================================
+
+.exportzp KERNAL_STATUS := $90          ; i/o operation status byte
+.exportzp KERNAL_STKEY  := $91          ; stop key flag
+.exportzp KERNAL_MSGFLG := $9D          ; os message flag
+.exportzp KERNAL_TIME   := $A0          ; 24 hour clock in 1/60th seconds ($A0-$A2)

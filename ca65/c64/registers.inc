@@ -19,7 +19,7 @@
 .ifndef __C64_REGISTERS_INC__
     __C64_REGISTERS_INC__ = 1
 
-  .include "c64/zp.inc"
+  .include "./registers.import.inc"
   .include "../a65/c64/registers.inc"
 
 .endif

@@ -16,50 +16,5 @@
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
 
-.export VIC_M0X
-.export VIC_M0Y
-.export VIC_M1X
-.export VIC_M1Y
-.export VIC_M2X
-.export VIC_M2Y
-.export VIC_M3X
-.export VIC_M3Y
-.export VIC_M4X
-.export VIC_M4Y
-.export VIC_M5X
-.export VIC_M5Y
-.export VIC_M6X
-.export VIC_M6Y
-.export VIC_M7X
-.export VIC_M7Y
-.export VIC_M07X8
-.export VIC_CONTROL_1
-.export VIC_RST
-.export VIC_LPX
-.export VIC_LPY
-.export VIC_M07E
-.export VIC_CONTROL_2
-.export VIC_M07YE
-.export VIC_MP
-.export VIC_IR
-.export VIC_IE
-.export VIC_M07DB
-.export VIC_M07MC
-.export VIC_M07XE
-.export VIC_M07M
-.export VIC_M07D
-.export VIC_EC
-.export VIC_B0C
-.export VIC_B1C
-.export VIC_B2C
-.export VIC_B3C
-.export VIC_MM0
-.export VIC_MM1
-.export VIC_M0C
-.export VIC_M1C
-.export VIC_M2C
-.export VIC_M3C
-.export VIC_M4C
-.export VIC_M5C
-.export VIC_M6C
-.export VIC_M7C
+.exportzp CPU_PORT_DIRECTION := $00
+.exportzp CPU_PORT_DATA      := $01

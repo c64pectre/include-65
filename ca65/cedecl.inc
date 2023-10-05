@@ -69,12 +69,12 @@
 ;;;   ; [RSP   ][rsp0  ] --+
 ;;;   ; lo
 .macro __begin_cedecl_frame
-    ldx z:FP
-    ldy z:FSP
-    stx z:0 , y
-    dec z:FSP
-    ldx z:RSP
-    stx z:FP
+    ldx FP
+    ldy FSP
+    stx 0 , y
+    dec FSP
+    ldx RSP
+    stx FP
 .endmacro
 
 ;;; summary: End frame
@@ -124,11 +124,11 @@
 ;;;   ; [RSP][fp0 ] --+
 ;;;   ; lo
 .macro __end_cedecl_frame
-    inc z:FSP
-    ldy z:FSP
-    ldx z:0 , y
-    stx z:FP
-    stx z:RSP
+    inc FSP
+    ldy FSP
+    ldx 0 , y
+    stx FP
+    stx RSP
 .endmacro
 
 .endif

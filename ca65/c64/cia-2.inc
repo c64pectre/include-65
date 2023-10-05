@@ -19,7 +19,7 @@
 .ifndef __C64_CIA_2_INC__
     __C64_CIA_2_INC__ = 1
 
-    .include "cia.inc"
+    .include "./cia-2.import.inc"
     .include "../a65/c64/cia-2.inc"
 
 .endif

@@ -16,7 +16,4 @@
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
 
-;;; summary: CPU 6510 = CPU 6502 + CPU port direction and data at $00 and #01
-
-CPU_PORT_DIRECTION = $00
-CPU_PORT_DATA      = $01
+;;; summary: CPU 6510

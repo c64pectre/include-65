@@ -19,6 +19,7 @@
 .ifndef __C64_BASIC_INTERNAL_INC__
     __C64_BASIC_INTERNAL_INC__ = 1
 
+    .include "./basic-internal.import.inc"
     .include "../a65/c64/basic-internal.inc"
 
 .endif

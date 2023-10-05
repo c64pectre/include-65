@@ -18,98 +18,84 @@
 
 ;;; summary: C64 memory map
 
-ZEROPAGE                            = $0000
-PAGE_ZEROPAGE                       = $00
-STACK                               = $0100
-PAGE_STACK                          = $01
-KERNAL_BASIC_RAM                    = $0200
-PAGE_KERNAL_BASIC_RAM_FIRST         = $02
-PAGE_KERNAL_BASIC_RAM_LAST          = $03
-PAGE_KERNAL_BASIC_RAM_SIZE          = PAGE_KERNAL_BASIC_RAM_LAST - PAGE_KERNAL_BASIC_RAM_FIRST + 1
-SCREEN_TEXT_RAM                     = $0400
-PAGE_SCREEN_TEXT_RAM_FIRST          = $04
-PAGE_SCREEN_TEXT_RAM_LAST           = $07
-PAGE_SCREEN_TEXT_RAM_SIZE           = PAGE_SCREEN_TEXT_RAM_LAST - PAGE_SCREEN_TEXT_RAM_FIRST + 1
-BASIC_RAM                           = $0800
-PAGE_BASIC_RAM_FIRST                = $08
-PAGE_BASIC_RAM_LAST                 = $9F
-PAGE_BASIC_RAM_SIZE                 = PAGE_BASIC_RAM_LAST - PAGE_BASIC_RAM_FIRST + 1
-VIC_CHARACTER_ROM_BANK_0            = $1000
-PAGE_VIC_CHARACTER_ROM_BANK_0_FIRST = $10
-PAGE_VIC_CHARACTER_ROM_BANK_0_LAST  = $1F
-PAGE_VIC_CHARACTER_ROM_BANK_0_SIZE  = PAGE_VIC_CHARACTER_ROM_BANK_0_LAST - PAGE_VIC_CHARACTER_ROM_BANK_0_FIRST + 1
-VIC_CHARACTER_ROM_BANK_1            = $9000
-PAGE_VIC_CHARACTER_ROM_BANK_1_FIRST = $90
-PAGE_VIC_CHARACTER_ROM_BANK_1_LAST  = $9F
-PAGE_VIC_CHARACTER_ROM_BANK_1_SIZE  = PAGE_VIC_CHARACTER_ROM_BANK_1_LAST - PAGE_VIC_CHARACTER_ROM_BANK_1_FIRST + 1
-BASIC_ROM                           = $A000
-PAGE_BASIC_ROM_FIRST                = $A0
-PAGE_BASIC_ROM_LAST                 = $BF
-PAGE_BASIC_ROM_SIZE                 = PAGE_BASIC_ROM_LAST - PAGE_BASIC_ROM_FIRST + 1
-UPPER_RAM                           = $C000
-PAGE_UPPER_RAM_FIRST                = $C0
-PAGE_UPPER_RAM_LAST                 = $CF
-PAGE_UPPER_RAM_SIZE                 = PAGE_UPPER_RAM_LAST - PAGE_UPPER_RAM_FIRST + 1
-IO                                  = $D000
-PAGE_IO_FIRST                       = $D0
-PAGE_IO_LAST                        = $DF
-PAGE_IO_SIZE                        = PAGE_IO_LAST - PAGE_IO_FIRST + 1
-CHARACTER_ROM                       = $D000
-PAGE_CHARACTER_ROM_FIRST            = $D0
-PAGE_CHARACTER_ROM_LAST             = $DF
-PAGE_CHARACTER_ROM_SIZE             = PAGE_CHARACTER_ROM_LAST - PAGE_CHARACTER_ROM_FIRST + 1
-VIC                                 = $D000
-PAGE_VIC_FIRST                      = $D0
-PAGE_VIC_LAST                       = $D3
-PAGE_VIC_SIZE                       = PAGE_VIC_LAST - PAGE_VIC_FIRST + 1
-SID                                 = $D400
-PAGE_SID_FIRST                      = $D4
-PAGE_SID_LAST                       = $D7
-PAGE_SID_SIZE                       = PAGE_SID_LAST - PAGE_SID_FIRST + 1
-PAGE_SCREEN_COLOR_RAM_FIRST         = $D8
-PAGE_SCREEN_COLOR_RAM_LAST          = $DB
-PAGE_SCREEN_COLOR_RAM_SIZE          = PAGE_SCREEN_COLOR_RAM_LAST - PAGE_SCREEN_COLOR_RAM_FIRST + 1
-SCREEN_COLOR_RAM                    = $D800
-CIA_1                               = $DC00
-PAGE_CIA_1                          = $DC
-PAGE_CIA_1_FIRST                    = PAGE_CIA_1
-PAGE_CIA_1_LAST                     = PAGE_CIA_1
-PAGE_CIA_1_SIZE                     = PAGE_CIA_1_LAST - PAGE_CIA_1_FIRST + 1
-CIA_2                               = $DD00
-PAGE_CIA_2                          = $DD
-PAGE_CIA_2_FIRST                    = PAGE_CIA_2
-PAGE_CIA_2_LAST                     = PAGE_CIA_2
-PAGE_CIA_2_SIZE                     = PAGE_CIA_2_LAST - PAGE_CIA_2_FIRST + 1
-IO_AREA_1                           = $DE00
-PAGE_IO_AREA_1                      = $DE
-PAGE_IO_AREA_1_FIRST                = PAGE_IO_AREA_1
-PAGE_IO_AREA_1_LAST                 = PAGE_IO_AREA_1
-PAGE_IO_AREA_1_SIZE                 = PAGE_IO_AREA_1_LAST - PAGE_IO_AREA_1_FIRST + 1
-IO_AREA_2                           = $DF00
-PAGE_IO_AREA_2                      = $DF
-PAGE_IO_AREA_2_FIRST                = PAGE_IO_AREA_2
-PAGE_IO_AREA_2_LAST                 = PAGE_IO_AREA_2
-PAGE_IO_AREA_2_SIZE                 = PAGE_IO_AREA_2_LAST - PAGE_IO_AREA_2_FIRST + 1
-KERNAL_ROM                          = $E000
-PAGE_KERNAL_ROM_FIRST               = $E0
-PAGE_KERNAL_ROM_LAST                = $FF
-PAGE_KERNAL_ROM_SIZE                = PAGE_KERNAL_ROM_LAST - PAGE_KERNAL_ROM_FIRST + 1
+ZEROPAGE_PAGE                       = $00
+ZEROPAGE_PAGE_FIRST                 = $00
+ZEROPAGE_PAGE_LAST                  = $00
+ZEROPAGE_PAGE_COUNT                 = 1
 
-; Execution address of interrupt service routine. Default $EA31
-KERNAL_VECTOR_IRQ    = $0314
-KERNAL_VECTOR_IRQ_LO = $0314
-KERNAL_VECTOR_IRQ_HI = $0315
+STACK_PAGE                          = $01
+STACK_PAGE_FIRST                    = $00
+STACK_PAGE_LAST                     = $00
+STACK_PAGE_COUNT                    = 1
 
-; Execution address of BRK service routine. Default $FE66
-KERNAL_VECTOR_BRK    = $0316
-KERNAL_VECTOR_BRK_LO = $0316
-KERNAL_VECTOR_BRK_HI = $0317
+KERNAL_BASIC_RAM_PAGE_FIRST         = $02
+KERNAL_BASIC_RAM_PAGE_LAST          = $03
+KERNAL_BASIC_RAM_PAGE_COUNT         = KERNAL_BASIC_RAM_PAGE_LAST - KERNAL_BASIC_RAM_PAGE_FIRST + 1
 
-; Execution address of non-maskable interrupt service routine. Default $FE47
-KERNAL_VECTOR_NMI    = $0318
-KERNAL_VECTOR_NMI_LO = $0318
-KERNAL_VECTOR_NMI_HI = $0319
+SCREEN_TEXT_RAM_PAGE_FIRST          = $04
+SCREEN_TEXT_RAM_PAGE_LAST           = $07
+SCREEN_TEXT_RAM_PAGE_COUNT          = SCREEN_TEXT_RAM_PAGE_LAST - SCREEN_TEXT_RAM_PAGE_FIRST + 1
 
-KERNAL_NMI   = $FFFA
-KERNAL_IRQ   = $FFFE
-KERNAL_RESET = $FFFC
+BASIC_RAM_PAGE_FIRST                = $08
+BASIC_RAM_PAGE_LAST                 = $9F
+BASIC_RAM_PAGE_COUNT                = BASIC_RAM_PAGE_LAST - BASIC_RAM_PAGE_FIRST + 1
+
+VIC_CHARACTER_ROM_BANK_0_PAGE_FIRST = $10
+VIC_CHARACTER_ROM_BANK_0_PAGE_LAST  = $1F
+VIC_CHARACTER_ROM_BANK_0_PAGE_COUNT = VIC_CHARACTER_ROM_BANK_0_PAGE_LAST - VIC_CHARACTER_ROM_BANK_0_PAGE_FIRST + 1
+
+VIC_CHARACTER_ROM_BANK_1_PAGE_FIRST = $90
+VIC_CHARACTER_ROM_BANK_1_PAGE_LAST  = $9F
+VIC_CHARACTER_ROM_BANK_1_PAGE_COUNT = VIC_CHARACTER_ROM_BANK_1_PAGE_FIRST - VIC_CHARACTER_ROM_BANK_1_PAGE_LAST + 1
+
+BASIC_ROM_PAGE_FIRST                = $A0
+BASIC_ROM_PAGE_LAST                 = $BF
+BASIC_ROM_PAGE_COUNT                = BASIC_ROM_PAGE_LAST - BASIC_ROM_PAGE_FIRST + 1
+
+UPPER_RAM_PAGE_FIRST                = $C0
+UPPER_RAM_PAGE_LAST                 = $CF
+UPPER_RAM_PAGE_COUNT                = UPPER_RAM_PAGE_LAST - UPPER_RAM_PAGE_FIRST + 1
+
+IO_AREA_PAGE_FIRST                  = $D0
+IO_AREA_PAGE_LAST                   = $DF
+IO_AREA_PAGE_COUNT                  = IO_AREA_PAGE_LAST - IO_AREA_PAGE_FIRST + 1
+
+CHARACTER_ROM_PAGE_FIRST            = $D0
+CHARACTER_ROM_PAGE_LAST             = $DF
+CHARACTER_ROM_PAGE_COUNT            = CHARACTER_ROM_PAGE_LAST - CHARACTER_ROM_PAGE_FIRST + 1
+
+VIC_PAGE_FIRST                      = $D0
+VIC_PAGE_LAST                       = $D3
+VIC_PAGE_COUNT                      = VIC_PAGE_LAST - VIC_PAGE_FIRST + 1
+
+SID_PAGE_FIRST                      = $D4
+SID_PAGE_LAST                       = $D7
+SID_PAGE_COUNT                      = SID_PAGE_LAST - SID_PAGE_FIRST + 1
+
+SCREEN_COLOR_RAM_PAGE_FIRST         = $D8
+SCREEN_COLOR_RAM_PAGE_LAST          = $DB
+SCREEN_COLOR_RAM_PAGE_COUNT         = SCREEN_COLOR_RAM_PAGE_LAST - SCREEN_COLOR_RAM_PAGE_FIRST + 1
+
+CIA_1_PAGE                          = $DC
+CIA_1_PAGE_FIRST                    = CIA_1_PAGE
+CIA_1_PAGE_LAST                     = CIA_1_PAGE
+CIA_1_PAGE_COUNT                    = 1
+
+CIA_2_PAGE                          = $DD
+CIA_2_PAGE_FIRST                    = CIA_2_PAGE
+CIA_2_PAGE_LAST                     = CIA_2_PAGE
+CIA_2_PAGE_COUNT                    = 1
+
+IO_AREA_1_PAGE                      = $DE
+IO_AREA_1_PAGE_FIRST                = IO_AREA_1_PAGE
+IO_AREA_1_PAGE_LAST                 = IO_AREA_1_PAGE
+IO_AREA_1_PAGE_COUNT                = 1
+
+IO_AREA_2_PAGE                      = $DF
+IO_AREA_2_PAGE_FIRST                = IO_AREA_2_PAGE
+IO_AREA_2_PAGE_LAST                 = IO_AREA_2_PAGE
+IO_AREA_2_PAGE_COUNT                = 1
+
+KERNAL_ROM_PAGE_FIRST               = $E0
+KERNAL_ROM_PAGE_LAST                = $FF
+KERNAL_ROM_PAGE_COUNT               = KERNAL_ROM_PAGE_LAST - KERNAL_ROM_PAGE_FIRST + 1

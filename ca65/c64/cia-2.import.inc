@@ -16,9 +16,29 @@
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
 
-.ifndef __C64_ZP_INC__
-    __C64_ZP_INC__ = 1
+.ifndef __C64_CIA_2_IMPORT_INC__
+    __C64_CIA_2_IMPORT_INC__ = 1
 
-    .include "../a65/c64/zp.inc"
+.import CIA_2_REGISTER_BASE
+
+.import CIA_2_PRA
+.import CIA_2_PRB
+.import CIA_2_DDRA
+.import CIA_2_DDRB
+.import CIA_2_TA_LO
+.import CIA_2_TA_HI
+.import CIA_2_TB_LO
+.import CIA_2_TB_HI
+.import CIA_2_TOD
+.import CIA_2_TOD_10THS
+.import CIA_2_TOD_SEC
+.import CIA_2_TOD_MIN
+.import CIA_2_TOD_HR
+.import CIA_2_SDR
+.import CIA_2_ICR
+.import CIA_2_CRA
+.import CIA_2_CRB
+
+.import CIA_2_PRB_USERPORT_CDEFHJKL
 
 .endif

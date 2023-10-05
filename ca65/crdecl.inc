@@ -31,12 +31,12 @@
 ;;; notes:
 ;;;   Same as __begin_cedecl_frame
 .macro __begin_crdecl_frame
-    ldx z:FP
-    ldy z:FSP
-    stx z:0 , y
-    dec z:FSP
-    ldx z:RSP
-    stx z:FP
+    ldx FP
+    ldy FSP
+    stx 0 , y
+    dec FSP
+    ldx RSP
+    stx FP
 .endmacro
 
 ;;; summary: End frame
@@ -83,12 +83,12 @@
 ;;; |FSP|[fsp] --+   |
 ;;; |FP |[fp ] ------+
 .macro __end_crdecl_frame
-    ldx z:FP
-    stx z:RSP
-    inc z:FSP
-    ldy z:FSP
-    ldx z:0 , y
-    stx z:FP
+    ldx FP
+    stx RSP
+    inc FSP
+    ldy FSP
+    ldx 0 , y
+    stx FP
 .endmacro
 
 .endif

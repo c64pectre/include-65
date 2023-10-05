@@ -19,7 +19,7 @@
 .ifndef __C64_FRAME_REGISTERS_INC__
     __C64_FRAME_REGISTERS_INC__ = 1
 
-  .include "c64/registers.inc"
+  .include "./frame-registers.import.inc"
   .include "../a65/c64/frame-registers.inc"
 
 .endif

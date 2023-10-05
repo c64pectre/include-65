@@ -19,6 +19,8 @@
 .ifndef __C64_KERNAL_R3_INC__
     __C64_KERNAL_R3_INC__ = 1
 
+    .include "./kernal-r3.import.inc"
+
     .include "../a65/c64/kernal-r3.inc"
 
 .endif
