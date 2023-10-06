@@ -290,3 +290,23 @@
 .export JMPTBL_JPLOT_PLOT             := $FFF0
 .export JMPTBL_JIOBAS_IOBASE_RDBAS    := $FFF3
 .export KERNAL_ACTUAL_SIGNATURE       := $FFF6
+
+;region Implementation of KVECTORS
+
+.export KERNAL_KEY    := $EA31
+.export KERNAL_TIMB   := $FE66
+.export KERNAL_NNMI   := $FE47
+.export KERNAL_NOPEN  := $F34A
+.export KERNAL_NCLOSE := $F291
+.export KERNAL_NCHKIN := $F20E
+.export KERNAL_NCKOUT := $F250
+.export KERNAL_NCLRCH := $F333
+.export KERNAL_NBASIN := $F157
+.export KERNAL_NBSOUT := $F1CA
+.export KERNAL_NSTOP  := $F6ED
+.export KERNAL_NGETIN := $F13E
+.export KERNAL_NCLALL := $F32F
+.export KERNAL_NLOAD  := $F4A5
+.export KERNAL_NSAVE  := $F5ED
+
+;endregion
