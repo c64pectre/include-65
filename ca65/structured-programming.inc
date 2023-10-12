@@ -140,6 +140,18 @@
     _next:
 .endmacro
 
+.macro from_loop_next scope
+    .scope scope
+    _from:
+    _loop:
+    _next:
+.endmacro
+
+.macro loop_next
+    _loop:
+    _next:
+.endmacro
+
 ;;; summary: switch-case-end
 .macro switch scope
     .scope scope
@@ -165,6 +177,19 @@
 
 .macro finally
     _finally:
+.endmacro
+
+.macro finally_end
+    _finally:
+    _end:
+    .endscope
+.endmacro
+
+.macro catch_finally_end
+    _catch:
+    _finally:
+    _end:
+    .endscope
 .endmacro
 
 .endif

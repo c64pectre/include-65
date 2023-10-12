@@ -101,6 +101,8 @@ KERNAL_CURRENT_REVISION = KERNAL_REVISION_3
 ; point of view, but by convention
 ; ==============================================================================
 
+DEVICE_MIN         =  0
+DEVICE_MAX         = 30
 DEVICE_KEYBOARD    =  0
 DEVICE_DATASSETTE  =  1
 DEVICE_RS232       =  2
@@ -168,15 +170,17 @@ DEVICE_DISK_CHANNEL_15      = 15
 DEVICE_DISK_CHANNEL_COMMAND = 15
 
 ; ==============================================================================
-; Constants - Serial bus
+; Constants - Serial bus commands
 ; ==============================================================================
 
-SERIAL_GLOBAL_COMMAND = $00  ; %000nnnnn
-SERIAL_PA_LISTEN      = $20  ; %001nnnnn
-SERIAL_PA_TALK        = $40  ; %010nnnnn
-SERIAL_SA_SECOND      = $60  ; %011nnnnn
-SERIAL_SA_CLOSE       = $E0  ; %1110nnnn
-SERIAL_SA_OPEN        = $F0  ; %1111nnnn
+SERIAL_COMMAND_GLOBAL    = $00  ; %000nnnnn
+SERIAL_COMMAND_PA_LISTEN = $20  ; %001nnnnn
+SERIAL_COMMAND_PA_TALK   = $40  ; %010nnnnn
+SERIAL_COMMAND_SA_SECOND = $60  ; %011nnnnn
+SERIAL_COMMAND_SA_CLOSE  = $E0  ; %1110nnnn
+SERIAL_COMMAND_SA_OPEN   = $F0  ; %1111nnnn
+SERIAL_COMMAND_UNLISTEN  = $3F  ; %00111111
+SERIAL_COMMAND_UNTALK    = $5F  ; %01011111
 
 ; ==============================================================================
 ; Constants
@@ -207,9 +211,9 @@ KERNAL_IO_ERROR_SHORT_BLOCK        = %00000100
 KERNAL_IO_ERROR_LONG_BLOCK         = %00001000
 KERNAL_IO_ERROR_SECOND_PASS        = %00010000
 KERNAL_IO_ERROR_CHKSUM             = %00100000
-KERNAL_IO_EOI                      = %01000000
-KERNAL_IO_ERROR_DEVICE_NOT_PRESENT = %10000000
-KERNAL_IO_ERROR_FRAMING            = %00000011
+KERNAL_IO_EOI                      = %01000000      ; BIT M ; BVS TRUE BVC FALSE
+KERNAL_IO_ERROR_DEVICE_NOT_PRESENT = %10000000      ; $80
+KERNAL_IO_ERROR_FRAMING            = %00000011      ; $03
 
 ; ==============================================================================
 ; Constants - KERNAL_SETMSG

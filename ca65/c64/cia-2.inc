@@ -20,6 +20,7 @@
     __C64_CIA_2_INC__ = 1
 
     .include "./cia-2.import.inc"
-    .include "../a65/c64/cia-2.inc"
+    .include "../cia.inc"
+    .include "../../a65/c64/cia-2.inc"
 
 .endif

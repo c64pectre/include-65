@@ -117,6 +117,9 @@
     a7c
     rol
 .endmacro
+.macro rsl_a
+    rsla
+.endmacro
 
 ;;; summary: Rotate Straight Left Byte in memory  8-bit rotate left
 ;;; result: [M].7 <- [M].6, [M].6 <- [M].5, ..., [M].1 <- [M].7, [M].0 <- [M].7 , A = +
@@ -124,6 +127,9 @@
     lda 0 + (M)
     asl
     rol 0 + (M)
+.endmacro
+.macro rsl_mb M
+    rslb M
 .endmacro
 
 ;;; summary: Arithmic Shift Right A  signed
@@ -133,6 +139,9 @@
 .macro asra
     a7c
     ror
+.endmacro
+.macro asr_a
+    asra
 .endmacro
 
 ;;; summary: Rotate Straight Right A  8-bit rotate right
@@ -146,6 +155,9 @@
     adc # $80 - 1
     :
 .endmacro
+.macro rsr_a
+    rsra
+.endmacro
 
 ;;; summary: Rotate Straight Right  8-bit rotate right Byte in memory
 ;;; result: [M].7 <- [M].0, [M].6 <- [M].7, ..., [M].1 <- [M].2, [M].0 <- [M].1, A = +
@@ -153,6 +165,9 @@
     lda 0 + (M)
     lsr
     ror 0 + (M)
+.endmacro
+.macro rsr_mb M
+    rsrb M
 .endmacro
 
 ;;; summary: Accumulator Swap Nibble
@@ -229,28 +244,46 @@
 ;;; summary: LoaD A from constant byte Value
 ;;; result: A = value
 ;;; changed: N+ , Z+
-.macro ldav value
-    lda # (value)
+.macro ldav Value
+    lda # (Value)
+.endmacro
+.macro lda_v Value
+    ldav Value
+.endmacro
+.macro lda_vb Value
+    ldav Value
 .endmacro
 
 ;;; summary: LoaD X from constant byte Value
 ;;; result: X = value
 ;;; changed: N+ , Z+
-.macro ldxv value
-    ldx # (value)
+.macro ldxv Value
+    ldx # (Value)
+.endmacro
+.macro ldx_v Value
+    ldxv Value
+.endmacro
+.macro ldx_vb Value
+    ldxv Value
 .endmacro
 
 ;;; summary: LoaD Y from constant byte Value
 ;;; result: Y = value
 ;;; changed: N+ , Z+
-.macro ldyv value
-    ldy # (value)
+.macro ldyv Value
+    ldy # (Value)
+.endmacro
+.macro ldy_v Value
+    ldyv Value
+.endmacro
+.macro ldy_vb Value
+    ldyv Value
 .endmacro
 
 ;;; summary: LoaD memory Byte target from constant byte Value
 ;;; result: [target] = value
 ;;; changed: A , N+ , Z+
-.macro ldbv target, value
+.macro ldbv Target, Value
     lda # (value)
     sta 0 + (target)
 .endmacro
@@ -1356,6 +1389,8 @@
 ;;; result: [M]:w <- [M]:w + 1
 ;;; bytes: zp: 6 , ab: 8
 ;;; cycles: zp: 12-14 , ab: 14-16
+;;; changed:
+;;;   NE unless you inc $FFFF
 .macro incw M
     inw M
 .endmacro
@@ -1364,16 +1399,32 @@
     incw AX
 .endmacro
 
+.macro inc_ax
+    incax
+.endmacro
+
 .macro incbx
     incw BX
+.endmacro
+
+.macro inc_bx
+    incbx
 .endmacro
 
 .macro inccx
     incw CX
 .endmacro
 
+.macro inc_cx
+    inccx
+.endmacro
+
 .macro incdx
     incw DX
+.endmacro
+
+.macro inc_dx
+    incdx
 .endmacro
 
 ;;; summary: DEcrement memory Word
@@ -1570,32 +1621,132 @@
 ;;; summary: Restore RSP cache
 ;;; result: X <- [RSP]
 .macro RESTORE_RSP
-    ldx z:RSP
+    ldx RSP
 .endmacro
 
 ;;; summary: Restore FP cache
 ;;; result: X <- [FP]
 .macro RESTORE_FP
-    ldx z:FP
+    ldx FP
 .endmacro
 
 ;;; summary: Begin pushing parameters
 ;;; result: X <- [RSP]
 .macro BEGIN_PUSH
-    ldx z:RSP
+    ldx RSP
 .endmacro
 
 ;;; summary: End pushing parameters
 ;;; result: [RSP] <- X
 .macro END_PUSH
-    stx z:RSP
+    stx RSP
 .endmacro
 
 ;;; summary: Reset frame  discard any pushed parameters
 ;;; result: [FP] -> [FPP] , X = [FP] = [RSP]
+;;; bytes: 
+;;; cycles: 
 .macro RESET_FRAME
-    ldx z:FP
-    stx z:RSP
+    ldx FP
+    stx RSP
+.endmacro
+
+;;; summary: Declare 1 local variable
+;;; bytes: 
+;;; cycles: 
+.macro FRAME_DECLARE_1_LOCAL_VAR
+    inx
+    stx FP
+    stx RSP
+.endmacro
+
+.macro FRAME_DECLARE_1_LOCAL_VAR_INIT_0
+    lda # 0
+    sta 0 , x
+    inx
+    stx FP
+    stx RSP
+.endmacro
+
+;;; summary: Declare 2 local variables
+;;; bytes: 
+;;; cycles: 
+.macro FRAME_DECLARE_2_LOCAL_VAR
+    inx
+    inx
+    stx FP
+    stx RSP
+.endmacro
+
+.macro FRAME_DECLARE_2_LOCAL_VAR_INIT_0
+    lda # 0
+    sta 0 , x
+    inx
+    sta 0 , x
+    inx
+    stx FP
+    stx RSP
+.endmacro
+
+;;; summary: Declare 3 local variables
+;;; bytes: 
+;;; cycles: 
+.macro FRAME_DECLARE_3_LOCAL_VAR
+    inx
+    inx
+    inx
+    stx FP
+    stx RSP
+.endmacro
+
+.macro FRAME_DECLARE_3_LOCAL_VAR_INIT_0
+    lda # 0
+    sta 0 , x
+    inx
+    sta 0 , x
+    inx
+    sta 0 , x
+    inx
+    stx FP
+    stx RSP
+.endmacro
+
+;;; summary: Declare 4 local variables
+;;; bytes: 8
+;;; cycles: 14
+.macro FRAME_DECLARE_4_LOCAL_VAR
+    inx
+    inx
+    inx
+    inx
+    stx FP
+    stx RSP
+.endmacro
+
+.macro FRAME_DECLARE_4_LOCAL_VAR_INIT_0
+    lda # 0
+    sta 0 , x
+    inx
+    sta 0 , x
+    inx
+    sta 0 , x
+    inx
+    sta 0 , x
+    inx
+    stx FP
+    stx RSP
+.endmacro
+
+;;; summary: Declare N local variables, best for N >= 5
+;;; bytes: 9
+;;; cycles: 14
+.macro FRAME_DECLARE_N_LOCAL_VAR Count
+    txa
+    clc
+    adc # (Count)
+    txa
+    stx FP
+    stx RSP
 .endmacro
 
 ; ==============================================================================
@@ -1606,10 +1757,14 @@
 ;;; result: [old X] <- value , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpvb value
-    lda # (value)
+.macro phpvb Value
+    lda # (Value)
     inx
     sta z: < -1,x
+.endmacro
+
+.macro php_vb Value
+    phpvb Value
 .endmacro
 
 ;;; summary: PusH Parameter Value Word
@@ -1636,6 +1791,10 @@
 .macro phpa
     inx
     sta z: < -1,x
+.endmacro
+
+.macro php_a
+    phpa
 .endmacro
 
 ;;; summary:  PusH Parameter Y
@@ -1923,6 +2082,10 @@
     lda z: < (0 + (parameter)) ,x
 .endmacro
 
+.macro lda_p parameter
+    ldap parameter
+.endmacro
+
 ;;; summary: LoaD Y from Parameter
 ;;; result: Y <- [X + parameter]
 ;;; changed: N+ , Z+
@@ -2047,6 +2210,24 @@
     ldwp DX, (parameter)
 .endmacro
 
+;;; summary: LoaD Parameter with Value Byte
+;;; result: [X + parameter] <- Value
+;;; changed:
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro ldp_vb Parameter, Value
+    lda # (Value)
+    sta z: < (0 + (Parameter)) , x
+.endmacro
+
+;;; summary: LoaD Parameter from Memory address Byte
+;;; result: [X + parameter] <- [Address]
+;;; changed:
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro ldp_mb Parameter, Address
+    lda (Address)
+    sta z: < (0 + (Parameter)) , x
+.endmacro
+
 ; ==============================================================================
 ; Synthetic instructions - Store soure (A, Y, B, W, al, ...) to parameters
 ; ==============================================================================
@@ -2057,6 +2238,10 @@
 ;;; notes: Assumes X is cached [FP]/[RSP]
 .macro stap parameter
     sta z: < (0 + (parameter)) , x
+.endmacro
+
+.macro sta_p parameter
+    stap parameter
 .endmacro
 
 ;;; summary: STore Y into Parameter
@@ -2236,6 +2421,10 @@
     dec z: < (0 + (parameter)) , x
 .endmacro
 
+.macro dec_p Parameter
+    decp Parameter
+.endmacro
+
 ;;; summary: Exclusive OR A with Parameter to A
 ;;; result: A <- A ^ @parameter
 ;;; changed: N+ Z+
@@ -2250,6 +2439,10 @@
 ;;; notes: Assumes X is cached [FP]/[RSP]
 .macro incp parameter
     inc z: < (0 + (parameter)) , x
+.endmacro
+
+.macro inc_p Parameter
+    incp Parameter
 .endmacro
 
 ;;; summary: INCrement Parameter Byte
@@ -2287,6 +2480,10 @@
     ora z: < (0 + (parameter)) , x
 .endmacro
 
+.macro ora_p parameter
+    orapa parameter
+.endmacro
+
 ;;; summary: ROtate Left Parameter
 ;;; result: C <- @parameter[76543210] <- C
 ;;; changed: N+ C+ Z+
@@ -2301,6 +2498,10 @@
 ;;; notes: Assumes X is cached [FP]/[RSP]
 .macro rorp parameter
     ror z: < (0 + (parameter)) , x
+.endmacro
+
+.macro ror_p parameter
+    rorp parameter
 .endmacro
 
 ;;; summary: SuBtract with Carry Parameter from A to A
