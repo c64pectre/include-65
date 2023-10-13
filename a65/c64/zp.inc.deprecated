@@ -20,11 +20,11 @@
 ;;; notes:
 ;;;   Available zero page locations:
 ;;;   FROM- TO  SIZE  LABEL       USAGE
-;;;   $02 - $09    8  ZP_1_FIRST  AX - DX
+;;;   $02 - $09    8  ZP_1_FIRST  REGISTERS_BASE AX - DX
 ;;;   $0B - $12    8  ZP_2_FIRST
-;;;   $14 - $2A   23  ZP_3_FIRST  FS
+;;;   $14 - $2A   23  ZP_3_FIRST  FS FS_BOTTOM..FS_TOP
 ;;;   $3F - $48   10  ZP_4_FIRST
-;;;   $4B - $72   40  ZP_5_FIRST  RS
+;;;   $4B - $72   40  ZP_5_FIRST  RS RS_BOTTOM RS_TOP
 ;;;   $8B - $8F    5  ZP_6_FIRST  RSP FSP FP MPX/MPL/MPH
 ;;;   $92          1  ZP_7_FIRST
 ;;;   $96 - $97    2  ZP_8_FIRST  

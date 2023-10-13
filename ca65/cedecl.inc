@@ -24,8 +24,7 @@
 ; ==============================================================================
 
 ;;; summary: Begin frame
-;;; result: X = [RSP] = [FP] , Y = [FSP]
-;;; changed: P.N=+, P.Z=0
+;;; changed: X=RSP=FP Y=FSP N+ Z0
 ;;; bytes: 12
 ;;; cycles: 21
 ;;; notes:
@@ -78,8 +77,8 @@
 .endmacro
 
 ;;; summary: End frame
-;;; result: X = [FP] = [RSP], Y = [FSP]
-;;; changed: P.N=+, P.Z=0
+;;; result: 
+;;; changed: X=FP=RSP Y=FSP N+ Z0
 ;;; bytes: 10
 ;;; cycles: 18
 ;;; notes:
@@ -124,11 +123,12 @@
 ;;;   ; [RSP][fp0 ] --+
 ;;;   ; lo
 .macro __end_cedecl_frame
-    inc FSP
-    ldy FSP
-    ldx 0 , y
+    inc FSP                             ;N+ Z+
+    ldy FSP                             ;Y+ N+ Z+
+    ldx 0 , y                           ;X+ N+ Z+
     stx FP
     stx RSP
+    ; check Z=0
 .endmacro
 
 .endif

@@ -15,3 +15,5 @@
 ;    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ;
 ;    Contact: https://github.com/c64pectre/include-65/ create an issue
+
+REGISTERS_SIZEOF = 8

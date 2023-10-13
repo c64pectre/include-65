@@ -8,4 +8,10 @@
 .importzp MPX
 .importzp MPH
 
+.importzp FS_BOTTOM
+.importzp FS_TOP
+
+.importzp RS_BOTTOM
+.importzp RS_TOP
+
 .endif

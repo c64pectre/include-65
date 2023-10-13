@@ -63,9 +63,15 @@
 
 .include "ce_decl.inc"
 
+;;; summary: Initialize registers and frame registers
+;;; changed:
+;;;   AX = BX = CX = DX = A = Y = 0
+;;;   X = FP = RSP = #RS_BOTTOM
 .macro INIT_FRAME_AND_REGISTERS
-    lda # 0          ; A = 0
-    tay              ; Y = 0
+    lda # 0                             ; A = 0
+    tay                                 ; Y = 0
+    sta MPL
+    sta MPH                             ; [MPX] = w:0
     ldx # REGISTERS_SIZEOF - 1          ; X = 7
     loop_do:
         sta REGISTERS_BASE , x          ; [REGISTERS_BASE + X] = 0
@@ -73,12 +79,11 @@
         bpl loop_do                     ; X >= 0 ?
     loop_end:
     ;
-    ldx # FS                            ; X = FS
-    stx FSP                             ; [FSP] = FS
-    ldx # RS                            ; X = RS
-    stx RSP                             ; [RSP] = RS = X
-    stx FP                              ; [FP] = RS = X
-    ; AX = BX = CX = DX = A = Y = 0 ; X = RSP = FP
+    ldx # FS_TOP                        ; X = #FS_TOP
+    stx FSP                             ; FSP = #FS_TOP
+    ldx # RS_BOTTOM                     ; X = #RS_BOTTOM
+    stx RSP                             ; RSP = X = #RS_BOTTOM
+    stx FP                              ; FP  = X = #RS_BOTTOM
 .endmacro
 
 ; ==============================================================================
@@ -113,35 +118,26 @@
 ;;; result: A.7 <- A.6, A.6 <- A.5, ..., A.1 <- A.7, A.0 <- A.7
 ;;; bytes: 3
 ;;; cycles: 4
-.macro rsla
+.macro rsl_a
     a7c
     rol
-.endmacro
-.macro rsl_a
-    rsla
 .endmacro
 
 ;;; summary: Rotate Straight Left Byte in memory  8-bit rotate left
 ;;; result: [M].7 <- [M].6, [M].6 <- [M].5, ..., [M].1 <- [M].7, [M].0 <- [M].7 , A = +
-.macro rslb M
+.macro rsl_b M
     lda 0 + (M)
     asl
     rol 0 + (M)
-.endmacro
-.macro rsl_mb M
-    rslb M
 .endmacro
 
 ;;; summary: Arithmic Shift Right A  signed
 ;;; result: A.7 <- A.7, A.6 <- A.7, ..., A.1 <- A.2, A.0 <- A.1
 ;;; bytes: 3
 ;;; cycles: 4
-.macro asra
+.macro asr_a
     a7c
     ror
-.endmacro
-.macro asr_a
-    asra
 .endmacro
 
 ;;; summary: Rotate Straight Right A  8-bit rotate right
@@ -149,25 +145,19 @@
 ;;; bytes: 5
 ;;; cycles: 6-8
 ;;; notes: at adc: C = 1, so will add extra 1.
-.macro rsra
+.macro rsr_a
     lsr
     bcc :+
     adc # $80 - 1
     :
 .endmacro
-.macro rsr_a
-    rsra
-.endmacro
 
 ;;; summary: Rotate Straight Right  8-bit rotate right Byte in memory
 ;;; result: [M].7 <- [M].0, [M].6 <- [M].7, ..., [M].1 <- [M].2, [M].0 <- [M].1, A = +
-.macro rsrb M
+.macro rsr_b M
     lda 0 + (M)
     lsr
     ror 0 + (M)
-.endmacro
-.macro rsr_mb M
-    rsrb M
 .endmacro
 
 ;;; summary: Accumulator Swap Nibble
@@ -196,7 +186,7 @@
 ;;; bytes: 2
 ;;; cycles: 2
 ;;; notes: same as oca
-.macro nota
+.macro not_a
     oca
 .endmacro
 
@@ -210,28 +200,28 @@
     adc # 1
 .endmacro
 
-;;; summary: Is bit bitindex set in source byte?
-.macro isbitset M, bitindex
+;;; summary: Is bit bitindex set in [M]?
+.macro is_bit_set M, bitindex
     lda 0 + (M)
     and # 1 << (bitindex)
 .endmacro
 
-;;; summary: Set bit bitindex in memory source byte
-.macro setbit M, bitindex
+;;; summary: Set bit bitindex in [M]?
+.macro set_bit M, bitindex
     lda 0 + (M)
     ora # 1 << (bitindex)
     sta 0 + (M)
 .endmacro
 
-;;; summary: Clear bit bitindex in memory byte
-.macro clrbit M, bitindex
+;;; summary: Clear bit bitindex in [M]
+.macro clr_bit M, bitindex
     lda 0 + (M)
     and # < ~ (1 << (bitindex))
     sta 0 + (M)
 .endmacro
 
-;;; summary: Clear bits in memory byte by set mask
-.macro clrbits M, setMask
+;;; summary: Clear bits in [M] by set mask
+.macro clr_bits M, setMask
     lda 0 + (M)
     and # ~ (setMask)
     sta 0 + (M)
@@ -242,887 +232,840 @@
 ; ==============================================================================
 
 ;;; summary: LoaD A from constant byte Value
-;;; result: A = value
-;;; changed: N+ , Z+
-.macro ldav Value
+;;; result: A = Value
+;;; changed: A+ N+ Z+
+.macro ld_a_v Value
     lda # (Value)
-.endmacro
-.macro lda_v Value
-    ldav Value
-.endmacro
-.macro lda_vb Value
-    ldav Value
 .endmacro
 
 ;;; summary: LoaD X from constant byte Value
-;;; result: X = value
-;;; changed: N+ , Z+
-.macro ldxv Value
+;;; result: X = Value
+;;; changed: X+ N+ Z+
+.macro ld_x_v Value
     ldx # (Value)
-.endmacro
-.macro ldx_v Value
-    ldxv Value
-.endmacro
-.macro ldx_vb Value
-    ldxv Value
 .endmacro
 
 ;;; summary: LoaD Y from constant byte Value
-;;; result: Y = value
-;;; changed: N+ , Z+
-.macro ldyv Value
+;;; result: Y = Value
+;;; changed: Y+ N+ Z+
+.macro ld_y_v Value
     ldy # (Value)
 .endmacro
-.macro ldy_v Value
-    ldyv Value
-.endmacro
-.macro ldy_vb Value
-    ldyv Value
+
+.macro ld_xy_v_w W
+    ldx # < (W)
+    ldy # > (W)
 .endmacro
 
-;;; summary: LoaD memory Byte target from constant byte Value
-;;; result: [target] = value
-;;; changed: A , N+ , Z+
-.macro ldbv Target, Value
-    lda # (value)
-    sta 0 + (target)
+;;; summary: LoaD memory Byte Target from constant byte Value
+;;; result: [Target] = Value
+;;; changed: A N+ Z+
+.macro ld_b_v Target, Value
+    lda # (Value)
+    sta 0 + (Target)
 .endmacro
 
-;;; summary: LoaD memory Word target from constant word Value
-;;; result: [target]:w = value
-;;; changed: A , N+ , Z+
-.macro ldwv target, value
-    lda # < (value)
-    sta 0 + (target)
-    lda # > (value)
-    sta 1 + (target)
+;;; summary: LoaD memory Word Target from constant word Value
+;;; result: [Target]:w = Value
+;;; changed: A+ N+ Z+
+.macro ld_w_v Target, Value
+    lda # < (Value)
+    sta 0 + (Target)
+    lda # > (Value)
+    sta 1 + (Target)
 .endmacro
 
 ;;; summary: LoaD AL from constant byte Value
-;;; result: AL <- value
-;;; changed: A , N+ , Z+
-.macro ldalv value
-    ldbv AL, (value)
+;;; result: AL <- Value
+;;; changed: A+ N+ Z+
+.macro ld_al_v Value
+    ld_b_v (AL), (Value)
 .endmacro
 
 ;;; summary: LoaD AH from constant byte Value
-;;; result: AH = value
-;;; changed: A , N+ , Z+
-.macro ldahv value
-    ldbv AH, (value)
+;;; result: AH = Value
+;;; changed: A+ N+ Z+
+.macro ld_ah_v Value
+    ld_b_v (AH), (Value)
 .endmacro
 
 ;;; summary: LoaD AX from constant word Value
-;;; result: AX = value
-;;; changed: A , N+ , Z+
-.macro ldaxv value
-    ldwv AX, (value)
+;;; result: AX = Value
+;;; changed: A N+ Z+
+.macro ld_ax_v Value
+    ld_w_v (AX), (Value)
 .endmacro
 
 ;;; summary: LoaD BL from constant byte Value
-;;; result: BL = value
-;;; changed: A , N+ , Z+
-.macro ldblv value
-    ldbv BL, (value)
+;;; result: BL = Value
+;;; changed: A N+ Z+
+.macro ld_bl_v Value
+    ld_b_v (BL), (Value)
 .endmacro
 
 ;;; summary: LoaD BH from constant byte Value
-;;; result: BH = value
-;;; changed: A, N+ , Z+
-.macro ldbhv value
-    ldbv BH, (value)
+;;; result: BH = Value
+;;; changed: A+ N+ Z+
+.macro ld_bh_v Value
+    ld_b_v (BH), (Value)
 .endmacro
 
 ;;; summary: LoaD BX from constant word Value
-;;; result: BX = value
-;;; changed: A , N+ , Z+
-.macro ldbxv value
-    ldwv BX, (value)
+;;; result: BX = Value
+;;; changed: A+ N+ Z+
+.macro ld_bx_v Value
+    ld_w_v (BX), (Value)
 .endmacro
 
 ;;; summary: LoaD CL from constant byte Value
-;;; result: CL <- value
+;;; result: CL <- Value
 ;;; changed: N+ , Z+
-;;; changed: A , N+ , Z+
-.macro ldclv value
-    ldbv CL, (value)
+;;; changed: A+ N+ Z+
+.macro ld_cl_v Value
+    ld_b_v (CL), (Value)
 .endmacro
 
 ;;; summary: LoaD CH from constant byte Value
-;;; result: CH = value
-;;; changed: A, N+ , Z+
-.macro ldchv value
-    ldbv CH, (value)
+;;; result: CH = Value
+;;; changed: A+ N+ Z+
+.macro ld_ch_v Value
+    ld_b_v (CH), (Value)
 .endmacro
 
 ;;; summary: LoaD CX from constant word Value
-;;; result: CX = value
-;;; changed: A , N+ , Z+
-.macro ldcxv value
-    ldwv CX, (value)
+;;; result: CX = Value
+;;; changed: A+ N+ Z+
+.macro ld_cx_v Value
+    ld_w_v (CX), (Value)
 .endmacro
 
 ;;; summary: LoaD DL from constant byte Value
-;;; result: DL = value
-;;; changed: A , N+ , Z+
-.macro lddlv value
-    ldbv DL, (value)
+;;; result: DL = Value
+;;; changed: A+ N+ Z+
+.macro ld_dl_v Value
+    ld_b_v (DL), (Value)
 .endmacro
 
 ;;; summary: LoaD DH from constant byte Value
-;;; result: DH = value
-;;; changed: A , N+ , Z+
-.macro lddhv value
-    ldbv DH, (value)
+;;; result: DH = Value
+;;; changed: A+ N+ Z+
+.macro ld_dh_v Value
+    ld_b_v (DH), (Value)
 .endmacro
 
 ;;; summary: LoaD DX from constant word Value
-;;; result: DX = value
-;;; changed: A , N+ , Z+
-.macro lddxv value
-    ldwv DX, (value)
-.endmacro
-
-;;; summary: Clear A
-;;; result: A = 0
-;;; changed: A, N0 , Z1
-.macro clra
-    ldav 0
-.endmacro
-
-;;; summary: Clear X
-;;; result: X = 0
-;;; changed: X, N0 , Z1
-.macro clrx
-    ldxv 0
-.endmacro
-
-;;; summary: Clear Y
-;;; result: Y = 0
-;;; changed: Y, N0 , Z1
-.macro clry
-    ldyv 0
-.endmacro
-
-;;; summary: Clear Byte memory
-;;; result: [M]:b = 0
-;;; changed: [M], N0 , Z1
-.macro clrb M
-    ldbv M, 0
-.endmacro
-
-;;; summary: Clear Word memory
-;;; result: [M]:w = 0
-;;; changed: [M], N0 , Z1
-.macro clrw M
-    ldwv M, 0
-.endmacro
-
-;;; summary: Clear AL
-;;; result: AL = 0
-;;; changed: AL, N0 , Z1
-.macro clral
-    clrb AL
-.endmacro
-
-;;; summary: Clear AH
-;;; result: AH = 0
-;;; changed: AH, N0 , Z1
-.macro clrah
-    clrb AH
-.endmacro
-
-;;; summary: Clear AX
-;;; result: AX = 0
-;;; changed: AX, N0 , Z1
-.macro clrax
-    clrw AX
-.endmacro
-
-;;; summary: Clear BL
-;;; result: BL = 0
-;;; changed: BL, N0 , Z1
-.macro clrbl
-    clrb BL
-.endmacro
-
-;;; summary: Clear BH
-;;; result: BH = 0
-;;; changed: BH, N0 , Z1
-.macro clrbh
-    clrb BH
-.endmacro
-
-;;; summary: Clear BX
-;;; result: BX = 0
-;;; changed: BX, N0 , Z1
-.macro clrbx
-    clrw BX
-.endmacro
-
-;;; summary: Clear CL
-;;; result: CL = 0
-;;; changed: CL, N0 , Z1
-.macro clrcl
-    clrb CL
-.endmacro
-
-;;; summary: Clear CH
-;;; result: CH = 0
-;;; changed: CH, N0 , Z1
-.macro clrch
-    clrb CH
-.endmacro
-
-;;; summary: Clear CX
-;;; result: CX = 0
-;;; changed: CX, N0 , Z1
-.macro clrcx
-    clrw CX
-.endmacro
-
-;;; summary: Clear DL
-;;; result: DL = 0
-;;; changed: DL, N0 , Z1
-.macro clrdl
-    clrb DL
-.endmacro
-
-;;; summary: Clear DH
-;;; result: DH = 0
-;;; changed: DH, N0 , Z1
-.macro clrdh
-    clrb DH
-.endmacro
-
-;;; summary: Clear DX
-;;; result: DX = 0
-;;; changed: DX, N0 , Z1
-.macro clrdx
-    clrw DX
-.endmacro
-
-; ==============================================================================
-; Synthetic instuctions - Load
-; ==============================================================================
-
-;;; summary: LoaD memory target from memory source Byte
-;;; result: [target] <- [source]
-;;; changed: A , N+ , Z+
-.macro ldb target, source
-    lda 0 + (source)
-    sta 0 + (target)
-.endmacro
-
-;;; summary: LoaD memory target from memory source Word
-;;; result: [target]:w <- [source]:w
-;;; changed: A , N+ , Z+
-.macro ldw target, source
-    lda 0 + (source)
-    sta 0 + (target)
-    lda 1 + (source)
-    sta 1 + (target)
-.endmacro
-
-;;; summary: LoaD AL from byte source
-;;; result: AL <- [source]
-;;; changed: A , N+ , Z+
-.macro ldal source
-    ldb AL, (source)
-.endmacro
-
-;;; summary: LoaD AH from byte source
-;;; result: AH <- [source]
-;;; changed: A , N+ , Z+
-.macro ldah source
-    ldb AH, (source)
-.endmacro
-
-;;; summary: LoaD AX from word source
-;;; result: AX <- [source]:w
-;;; changed: A , N+ , Z+
-.macro ldax source
-    ldw AX, (source)
-.endmacro
-
-;;; summary: LoaD BL from source
-;;; result: BL <- [source]
-;;; changed: A , N+ , Z+
-.macro ldbl source
-    ldb BL, (source)
-.endmacro
-
-;;; summary: LoaD BH from source
-;;; result: BH <- [source]
-;;; changed: A , N+ , Z+
-.macro ldbh source
-    ldb BH, (source)
-.endmacro
-
-;;; summary: LoaD BX from source
-;;; result: BX <- [source]:w
-;;; changed: A , N+ , Z+
-.macro ldbx source
-    ldw BX, (source)
-.endmacro
-
-;;; summary: LoaD CL from source
-;;; result: CL <- [source]
-;;; changed: A , N+ , Z+
-.macro ldcl source
-    ldb CL, (source)
-.endmacro
-
-;;; summary: LoaD CH from source
-;;; result: CH <- [source]
-;;; changed: A , N+ , Z+
-.macro ldch source
-    ldb CH,source
-.endmacro
-
-;;; summary: LoaD CX from source
-;;; result: CX <- [source]:w
-;;; changed: A , N+ , Z+
-.macro ldcx source
-    ldw CX, (source)
-.endmacro
-
-;;; summary: LoaD DL from source
-;;; result: DL <- [source]
-;;; changed: A , N+ , Z+
-.macro lddl source
-    ldb DL, (source)
-.endmacro
-
-;;; summary: LoaD DH from source
-;;; result: DH <- [source]
-;;; changed: A , N+ , Z+
-.macro lddh source
-    ldb DH, (source)
-.endmacro
-
-;;; summary: LoaD DX from source
-;;; result: DX <- [source]:w
-;;; changed: A , N+ , Z+
-.macro lddx source
-    ldw DX, (source)
-.endmacro
-
-;;; summary: LoaD AX from BX
-;;; result: AX <- BX
-;;; changed: A , N+ , Z+
-.macro ldaxbx
-    ldw AX, BX
-.endmacro
-
-;;; summary: LoaD AX from CX
-;;; result: AX <- CX
-;;; changed: A , N+ , Z+
-.macro ldaxcx
-    ldw AX, CX
-.endmacro
-
-;;; summary: LoaD AX from DX
-;;; result: AX <- DX
-;;; changed: A , N+ , Z+
-.macro ldaxdx
-    ldw AX, DX
-.endmacro
-
-;;; summary: LoaD BX from AX
-;;; result: BX <- AX
-;;; changed: A , N+ , Z+
-.macro ldbxax
-    ldw BX, AX
-.endmacro
-
-;;; summary: LoaD BX from CX
-;;; result: BX <- CX
-;;; changed: A , N+ , Z+
-.macro ldbxcx
-    ldw BX, CX
-.endmacro
-
-;;; summary: LoaD BX from DX
-;;; result: BX <- DX
-;;; changed: A , N+ , Z+
-.macro ldbxdx
-    ldw BX, DX
-.endmacro
-
-;;; summary: LoaD CX from AX
-;;; result: CX <- AX
-;;; changed: A , N+ , Z+
-.macro ldcxax
-    ldw CX, AX
-.endmacro
-
-;;; summary: LoaD CX from BX
-;;; result: CX <- BX
-;;; changed: A , N+ , Z+
-.macro ldcxbx
-    ldw CX, BX
-.endmacro
-
-;;; summary: LoaD CX from DX
-;;; result: CX <- DX
-;;; changed: A , N+ , Z+
-.macro ldcxdx
-    ldw CX, DX
-.endmacro
-
-;;; summary: LoaD DX from AX
-;;; result: DX <- AX
-;;; changed: A , N+ , Z+
-.macro lddxax
-    ldw DX, AX
-.endmacro
-
-;;; summary: LoaD DX from BX
-;;; result: DX <- BX
-;;; changed: A , N+ , Z+
-.macro lddxbx
-    ldw DX, BX
-.endmacro
-
-;;; summary: LoaD DX from CX
-;;; result: DX <- CX
-;;; changed: A , N+ , Z+
-.macro lddxcx
-    ldw DX, CX
-.endmacro
-
-;;; summary: LoaD AL from AH
-;;; result: AL <- AH
-;;; changed: A , N+ , Z+
-.macro ldalah
-    ldb AL, AH
-.endmacro
-
-;;; summary: LoaD AL from BL
-;;; result: AL <- BL
-;;; changed: A , N+ , Z+
-.macro ldalbl
-    ldb AL, BL
-.endmacro
-
-;;; summary: LoaD AL from BH
-;;; result: AL <- BH
-;;; changed: A , N+ , Z+
-.macro ldalbh
-    ldb AL, BH
-.endmacro
-
-;;; summary: LoaD AL from CL
-;;; result: AL <- CL
-;;; changed: A , N+ , Z+
-.macro ldalcl
-    ldb AL, CL
-.endmacro
-
-;;; summary: LoaD AL from CH
-;;; result: AL <- CH
-;;; changed: A , N+ , Z+
-.macro ldalch
-    ldb AL, CH
-.endmacro
-
-;;; summary: LoaD AL from DL
-;;; result: AL <- DL
-;;; changed: A , N+ , Z+
-.macro ldaldl
-    ldb AL, DL
-.endmacro
-
-;;; summary: LoaD AL from DH
-;;; result: AL <- DH
-;;; changed: A , N+ , Z+
-.macro ldaldh
-    ldb AL, DH
-.endmacro
-
-;;; summary: LoaD AH from AL
-;;; result: AH <- AL
-;;; changed: A , N+ , Z+
-.macro ldahal
-    ldb AH, AL
-.endmacro
-
-;;; summary: LoaD AH from BL
-;;; result: AH <- BL
-;;; changed: A , N+ , Z+
-.macro ldahbl
-    ldb AH, BL
-.endmacro
-
-;;; summary: LoaD AH from BH
-;;; result: AH <- BH
-;;; changed: A , N+ , Z+
-.macro ldahbh
-    ldb AH, BH
-.endmacro
-
-;;; summary: LoaD AH from CL
-;;; result: AH <- CL
-;;; changed: A , N+ , Z+
-.macro ldahcl
-    ldb AH, CL
-.endmacro
-
-;;; summary: LoaD AH from CH
-;;; result: AH <- CH
-;;; changed: A , N+ , Z+
-.macro ldahch
-    ldb AH, CH
-.endmacro
-
-;;; summary: LoaD AH from DL
-;;; result: AH <- DL
-;;; changed: A , N+ , Z+
-.macro ldahdl
-    ldb AH, DL
-.endmacro
-
-;;; summary: LoaD AH from DH
-;;; result: AH <- DH
-;;; changed: A , N+ , Z+
-.macro ldahdh
-    ldb AH, DH
-.endmacro
-
-;;; summary: LoaD BL from AL
-;;; result: BL <- AL
-;;; changed: A , N+ , Z+
-.macro ldblal
-    ldb BL, AL
-.endmacro
-
-;;; summary: LoaD BL from AH
-;;; result: BL <- AH
-;;; changed: A , N+ , Z+
-.macro ldblah
-    ldb BL, AH
-.endmacro
-
-;;; summary: LoaD BL from BH
-;;; result: BL <- BH
-;;; changed: A , N+ , Z+
-.macro ldblbh
-    ldb BL, BH
-.endmacro
-
-;;; summary: LoaD BL from CL
-;;; result: BL <- CL
-;;; changed: A , N+ , Z+
-.macro ldblcl
-    ldb BL, CL
-.endmacro
-
-;;; summary: LoaD BL from CH
-;;; result: BL <- CH
-;;; changed: A , N+ , Z+
-.macro ldblch
-    ldb BL, CH
-.endmacro
-
-;;; summary: LoaD BL from DL
-;;; result: BL <- DL
-;;; changed: A , N+ , Z+
-.macro ldbldl
-    ldb BL, DL
-.endmacro
-
-;;; summary: LoaD BL from DH
-;;; result: BL <- DH
-;;; changed: A , N+ , Z+
-.macro ldbldh
-    ldb BL, DH
-.endmacro
-
-;;; summary: LoaD BH from AL
-;;; result: BH <- AL
-;;; changed: A , N+ , Z+
-.macro ldbhal
-    ldb BH, AL
-.endmacro
-
-;;; summary: LoaD BH from AH
-;;; result: BH <- AH
-;;; changed: A , N+ , Z+
-.macro ldbhah
-    ldb BH, AH
-.endmacro
-
-;;; summary: LoaD BH from BL
-;;; result: BH <- BL
-;;; changed: A , N+ , Z+
-.macro ldbhbl
-    ldb BH, BL
-.endmacro
-
-;;; summary: LoaD BH from CL
-;;; result: BH <- CL
-;;; changed: A , N+ , Z+
-.macro ldbhcl
-    ldb BH, CL
-.endmacro
-
-;;; summary: LoaD BH from CH
-;;; result: BH <- CH
-;;; changed: A , N+ , Z+
-.macro ldbhch
-    ldb BH, CH
-.endmacro
-
-;;; summary: LoaD BH from DL
-;;; result: BH <- DL
-;;; changed: A , N+ , Z+
-.macro ldbhdl
-    ldb BH, DL
-.endmacro
-
-;;; summary: LoaD BH from DH
-;;; result: BH <- DH
-;;; changed: A , N+ , Z+
-.macro ldbhdh
-    ldb BH, DH
-.endmacro
-
-;;; summary: LoaD CL from AL
-;;; result: CL <- AL
-;;; changed: A , N+ , Z+
-.macro ldclal
-    ldb CL, AL
-.endmacro
-
-;;; summary: LoaD CL from AH
-;;; result: CL <- AH
-;;; changed: A , N+ , Z+
-.macro ldclah
-    ldb CL, AH
-.endmacro
-
-;;; summary: LoaD CL from BL
-;;; result: CL <- BL
-;;; changed: A , N+ , Z+
-.macro ldclbl
-    ldb CL, BL
-.endmacro
-
-;;; summary: LoaD CL from BH
-;;; result: CL <- BH
-;;; changed: A , N+ , Z+
-.macro ldclbh
-    ldb CL, BH
-.endmacro
-
-;;; summary: LoaD CL from CH
-;;; result: CL <- CH
-;;; changed: A , N+ , Z+
-.macro ldclch
-    ldb CL, CH
-.endmacro
-
-;;; summary: LoaD CL from DL
-;;; result: CL <- DL
-;;; changed: A , N+ , Z+
-.macro ldcldl
-    ldb CL, DL
-.endmacro
-
-;;; summary: LoaD CL from DH
-;;; result: CL <- DH
-;;; changed: A , N+ , Z+
-.macro ldcldh
-    ldb CL, DH
-.endmacro
-
-;;; summary: LoaD CH from AL
-;;; result: CH <- AL
-;;; changed: A , N+ , Z+
-.macro ldchal
-    ldb CH, AL
-.endmacro
-
-;;; summary: LoaD CH from AH
-;;; result: CH <- AH
-;;; changed: A , N+ , Z+
-.macro ldchah
-    ldb CH, AH
-.endmacro
-
-;;; summary: LoaD CH from BL
-;;; result: CH <- BL
-;;; changed: A , N+ , Z+
-.macro ldchbl
-    ldb CH, BL
-.endmacro
-
-;;; summary: LoaD CH from BH
-;;; result: CH <- BH
-;;; changed: A , N+ , Z+
-.macro ldchbh
-    ldb CH, BH
-.endmacro
-
-;;; summary: LoaD CH from CL
-;;; result: CH <- CL
-;;; changed: A , N+ , Z+
-.macro ldchcl
-    ldb CH, CL
-.endmacro
-
-;;; summary: LoaD CH from DL
-;;; result: CH <- DL
-;;; changed: A , N+ , Z+
-.macro ldchdl
-    ldb CH, DL
-.endmacro
-
-;;; summary: LoaD CH from DH
-;;; result: CH <- DH
-;;; changed: A , N+ , Z+
-.macro ldchdh
-    ldb CH, DH
-.endmacro
-
-;;; summary: LoaD DL from AL
-;;; result: DL <- AL
-;;; changed: A , N+ , Z+
-.macro lddlal
-    ldb DL, AL
-.endmacro
-
-;;; summary: LoaD DL from AH
-;;; result: DL <- AH
-;;; changed: A , N+ , Z+
-.macro lddlah
-    ldb DL, AH
-.endmacro
-
-;;; summary: LoaD DL from BL
-;;; result: DL <- BL
-;;; changed: A , N+ , Z+
-.macro lddlbl
-    ldb DL, BL
-.endmacro
-
-;;; summary: LoaD DL from BH
-;;; result: DL <- BH
-;;; changed: A , N+ , Z+
-.macro lddlbh
-    ldb DL, BH
-.endmacro
-
-;;; summary: LoaD DL from CL
-;;; result: DL <- CL
-;;; changed: A , N+ , Z+
-.macro lddlcl
-    ldb DL, CL
-.endmacro
-
-;;; summary: LoaD DL from CH
-;;; result: DL <- CH
-;;; changed: A , N+ , Z+
-.macro lddlch
-    ldb DL, CH
-.endmacro
-
-;;; summary: LoaD DL from DH
-;;; result: DL <- DH
-;;; changed: A , N+ , Z+
-.macro lddldh
-    ldb DL, DH
-.endmacro
-
-;;; summary: LoaD DH from AL
-;;; result: DH <- AL
-;;; changed: A , N+ , Z+
-.macro lddhal
-    ldb DH, AL
-.endmacro
-
-;;; summary: LoaD DH from AH
-;;; result: DH <- AH
-;;; changed: A , N+ , Z+
-.macro lddhah
-    ldb DH, AH
-.endmacro
-
-;;; summary: LoaD DH from BL
-;;; result: DH <- BL
-;;; changed: A , N+ , Z+
-.macro lddhbl
-    ldb DH, BL
-.endmacro
-
-;;; summary: LoaD DH from BH
-;;; result: DH <- BH
-;;; changed: A , N+ , Z+
-.macro lddhbh
-    ldb DH, BH
-.endmacro
-
-;;; summary: LoaD DH from CL
-;;; result: DH <- CL
-;;; changed: A , N+ , Z+
-.macro lddhcl
-    ldb DH, CL
-.endmacro
-
-;;; summary: LoaD DH from CH
-;;; result: DH <- CH
-;;; changed: A , N+ , Z+
-.macro lddhch
-    ldb DH, CH
-.endmacro
-
-;;; summary: LoaD DH from DL
-;;; result: DH <- DL
-;;; changed: A , N+ , Z+
-.macro lddhdl
-    ldb DH, DL
+;;; result: DX = Value
+;;; changed: A+ N+ Z+
+.macro ld_dx_v Value
+    ld_w_v (DX), (Value)
 .endmacro
 
 ; ==============================================================================
 ; Synthetic instuctions - Clear
 ; ==============================================================================
 
-;;; summary: CLear A
+;;; summary: Clear A
 ;;; result: A = 0
-;;; changed: N0 , Z1
-.macro cla
-    ldav 0
+;;; changed: A+ N0 Z1
+.macro clr_a
+    ld_a_v (0)
 .endmacro
 
-;;; summary: CLear X
+;;; summary: Clear X
 ;;; result: X = 0
-;;; changed: N0 , Z1
-.macro clx
-    ldxv 0
+;;; changed: X+ N0 Z1
+.macro clr_x
+    ld_x_v (0)
 .endmacro
 
-;;; summary: CLear Y
+;;; summary: Clear Y
 ;;; result: Y = 0
-;;; changed: N0 Z1
-.macro cly
-    ldyv 0
+;;; changed: Y+ N0 Z1
+.macro clr_y
+    ld_y_v (0)
 .endmacro
 
-;;; summary: CLear Byte
-;;; result: [target] = 0
-;;; changed: N0 , Z0
-.macro clb target
-    ldb (target), 0
+;;; summary: Clear Byte memory
+;;; result: [M]:b = 0
+;;; changed: [M]+ N0 Z1
+.macro clr_b M
+    ld_b_v (M), (0)
 .endmacro
 
-;;; summary: CLear Word
-;;; result: [target]:w = 0
-;;; changed: N0 , Z0
-.macro clw target
-    cla
-    sta 0 + (target)
-    sta 1 + (target)
+;;; summary: Clear Word memory
+;;; result: [M]:w = 0
+;;; changed: [M], N0 , Z1
+.macro clr_w M
+    clr_a
+    sta 0 + (M)
+    sta 1 + (M)
+.endmacro
+
+;;; summary: Clear AL
+;;; result: AL = 0
+;;; changed: AL, N0 , Z1
+.macro clr_al
+    clr_b (AL)
+.endmacro
+
+;;; summary: Clear AH
+;;; result: AH = 0
+;;; changed: AH, N0 , Z1
+.macro clr_ah
+    clr_b (AH)
+.endmacro
+
+;;; summary: Clear AX
+;;; result: AX = 0
+;;; changed: AX+ N0 Z1
+.macro clr_ax
+    clr_w (AX)
+.endmacro
+
+;;; summary: Clear BL
+;;; result: BL = 0
+;;; changed: BL+ N0 Z1
+.macro clr_bl
+    clr_b (BL)
+.endmacro
+
+;;; summary: Clear BH
+;;; result: BH = 0
+;;; changed: BH, N0 , Z1
+.macro clr_bh
+    clr_b (BH)
+.endmacro
+
+;;; summary: Clear BX
+;;; result: BX = 0
+;;; changed: BX, N0 , Z1
+.macro clr_bx
+    clr_w (BX)
+.endmacro
+
+;;; summary: Clear CL
+;;; result: CL = 0
+;;; changed: CL+ N0 Z1
+.macro clr_cl
+    clr_b (CL)
+.endmacro
+
+;;; summary: Clear CH
+;;; result: CH = 0
+;;; changed: CH, N0 , Z1
+.macro clr_ch
+    clr_b (CH)
+.endmacro
+
+;;; summary: Clear CX
+;;; result: CX = 0
+;;; changed: CX, N0 , Z1
+.macro clr_cx
+    clr_w (CX)
+.endmacro
+
+;;; summary: Clear DL
+;;; result: DL = 0
+;;; changed: DL, N0 , Z1
+.macro clr_dl
+    clr_b (DL)
+.endmacro
+
+
+;;; summary: Clear DH
+;;; result: DH = 0
+;;; changed: DH, N0 , Z1
+.macro clr_dh
+    clr_b (DH)
+.endmacro
+
+;;; summary: Clear DX
+;;; result: DX = 0
+;;; changed: DX, N0 , Z1
+.macro clr_dx
+    clr_w (DX)
+.endmacro
+
+; ==============================================================================
+; Synthetic instuctions - Load
+; ==============================================================================
+
+;;; summary: LoaD memory Target from memory Source Byte
+;;; result: [Target] <- [Source]
+;;; changed: A , N+ , Z+
+.macro ld_b Target, Source
+    lda 0 + (Source)
+    sta 0 + (Target)
+.endmacro
+
+;;; summary: LoaD memory Target from memory Source Word
+;;; result: [Target]:w <- [Source]:w
+;;; changed: A , N+ , Z+
+.macro ld_w Target, Source
+    lda 0 + (Source)
+    sta 0 + (Target)
+    lda 1 + (Source)
+    sta 1 + (Target)
+.endmacro
+
+;;; summary: LoaD AL from byte Source
+;;; result: AL <- [Source]
+;;; changed: A , N+ , Z+
+.macro ld_al Source
+    ld_b (AL), (Source)
+.endmacro
+
+;;; summary: LoaD AH from byte Source
+;;; result: AH <- [Source]
+;;; changed: A , N+ , Z+
+.macro ld_ah Source
+    ld_b (AH), (Source)
+.endmacro
+
+;;; summary: LoaD AX from word Source
+;;; result: AX <- [Source]:w
+;;; changed: A , N+ , Z+
+.macro ld_ax Source
+    ld_w (AX), (Source)
+.endmacro
+
+;;; summary: LoaD BL from Source
+;;; result: BL <- [Source]
+;;; changed: A , N+ , Z+
+.macro ldbl Source
+    ld_b (BL), (Source)
+.endmacro
+
+;;; summary: LoaD BH from Source
+;;; result: BH <- [Source]
+;;; changed: A , N+ , Z+
+.macro ldbh Source
+    ld_b (BH), (Source)
+.endmacro
+
+;;; summary: LoaD BX from Source
+;;; result: BX <- [Source]:w
+;;; changed: A , N+ , Z+
+.macro ldbx Source
+    ld_w (BX), (Source)
+.endmacro
+
+;;; summary: LoaD CL from Source
+;;; result: CL <- [Source]
+;;; changed: A , N+ , Z+
+.macro ld_cl Source
+    ld_b (CL), (Source)
+.endmacro
+
+;;; summary: LoaD CH from Source
+;;; result: CH <- [Source]
+;;; changed: A , N+ , Z+
+.macro ld_ch Source
+    ld_b (CH), (Source)
+.endmacro
+
+;;; summary: LoaD CX from Source
+;;; result: CX <- [Source]:w
+;;; changed: A , N+ , Z+
+.macro ld_cx Source
+    ld_w (CX), (Source)
+.endmacro
+
+;;; summary: LoaD DL from Source
+;;; result: DL <- [Source]
+;;; changed: A , N+ , Z+
+.macro ld_dl Source
+    ld_b (DL), (Source)
+.endmacro
+
+;;; summary: LoaD DH from Source
+;;; result: DH <- [Source]
+;;; changed: A , N+ , Z+
+.macro ld_dh Source
+    ld_b (DH), (Source)
+.endmacro
+
+;;; summary: LoaD DX from Source
+;;; result: DX <- [Source]:w
+;;; changed: A , N+ , Z+
+.macro ld_dx Source
+    ld_w (DX), (Source)
+.endmacro
+
+;;; summary: LoaD AX from BX
+;;; result: AX <- BX
+;;; changed: A , N+ , Z+
+.macro ld_ax_bx
+    ld_w (AX), (BX)
+.endmacro
+
+;;; summary: LoaD AX from CX
+;;; result: AX <- CX
+;;; changed: A , N+ , Z+
+.macro ld_ax_cx
+    ld_w (AX), (CX)
+.endmacro
+
+;;; summary: LoaD AX from DX
+;;; result: AX <- DX
+;;; changed: A , N+ , Z+
+.macro ld_ax_dx
+    ld_w (AX), (DX)
+.endmacro
+
+;;; summary: LoaD BX from AX
+;;; result: BX <- AX
+;;; changed: A , N+ , Z+
+.macro ld_bx_ax
+    ld_w (BX), (AX)
+.endmacro
+
+;;; summary: LoaD BX from CX
+;;; result: BX <- CX
+;;; changed: A , N+ , Z+
+.macro ld_bx_cx
+    ld_w (BX), (CX)
+.endmacro
+
+;;; summary: LoaD BX from DX
+;;; result: BX <- DX
+;;; changed: A , N+ , Z+
+.macro ld_bx_dx
+    ld_w (BX), (DX)
+.endmacro
+
+;;; summary: LoaD CX from AX
+;;; result: CX <- AX
+;;; changed: A , N+ , Z+
+.macro ld_cx_ax
+    ld_w (CX), (AX)
+.endmacro
+
+;;; summary: LoaD CX from BX
+;;; result: CX <- BX
+;;; changed: A , N+ , Z+
+.macro ld_cx_bx
+    ld_w (CX), (BX)
+.endmacro
+
+;;; summary: LoaD CX from DX
+;;; result: CX <- DX
+;;; changed: A , N+ , Z+
+.macro ld_cx_dx
+    ld_w (CX), (DX)
+.endmacro
+
+;;; summary: LoaD DX from AX
+;;; result: DX <- AX
+;;; changed: A , N+ , Z+
+.macro ld_dx_ax
+    ld_w (DX), (AX)
+.endmacro
+
+;;; summary: LoaD DX from BX
+;;; result: DX <- BX
+;;; changed: A , N+ , Z+
+.macro ld_dx_bx
+    ld_w (DX), (BX)
+.endmacro
+
+;;; summary: LoaD DX from CX
+;;; result: DX <- CX
+;;; changed: A , N+ , Z+
+.macro ld_dx_cx
+    ld_w (DX), (CX)
+.endmacro
+
+;;; summary: LoaD AL from AH
+;;; result: AL <- AH
+;;; changed: A , N+ , Z+
+.macro ld_al_ah
+    ld_b (AL), (AH)
+.endmacro
+
+;;; summary: LoaD AL from BL
+;;; result: AL <- BL
+;;; changed: A , N+ , Z+
+.macro ld_al_bl
+    ld_b (AL), (BL)
+.endmacro
+
+;;; summary: LoaD AL from BH
+;;; result: AL <- BH
+;;; changed: A , N+ , Z+
+.macro ld_al_bh
+    ld_b (AL), (BH)
+.endmacro
+
+;;; summary: LoaD AL from CL
+;;; result: AL <- CL
+;;; changed: A , N+ , Z+
+.macro ld_al_cl
+    ld_b (AL), (CL)
+.endmacro
+
+;;; summary: LoaD AL from CH
+;;; result: AL <- CH
+;;; changed: A , N+ , Z+
+.macro ld_al_ch
+    ld_b (AL), (CH)
+.endmacro
+
+;;; summary: LoaD AL from DL
+;;; result: AL <- DL
+;;; changed: A , N+ , Z+
+.macro ld_al_dl
+    ld_b (AL), (DL)
+.endmacro
+
+;;; summary: LoaD AL from DH
+;;; result: AL <- DH
+;;; changed: A , N+ , Z+
+.macro ld_al_dh
+    ld_b (AL), (DH)
+.endmacro
+
+;;; summary: LoaD AH from AL
+;;; result: AH <- AL
+;;; changed: A , N+ , Z+
+.macro ldahal
+    ld_b (AH), (AL)
+.endmacro
+
+;;; summary: LoaD AH from BL
+;;; result: AH <- BL
+;;; changed: A , N+ , Z+
+.macro ld_ah_bl
+    ld_b (AH), (BL)
+.endmacro
+
+;;; summary: LoaD AH from BH
+;;; result: AH <- BH
+;;; changed: A , N+ , Z+
+.macro ld_ah_bh
+    ld_b (AH), (BH)
+.endmacro
+
+;;; summary: LoaD AH from CL
+;;; result: AH <- CL
+;;; changed: A , N+ , Z+
+.macro ld_ah_cl
+    ld_b (AH), (CL)
+.endmacro
+
+;;; summary: LoaD AH from CH
+;;; result: AH <- CH
+;;; changed: A , N+ , Z+
+.macro ld_ah_ch
+    ld_b (AH), (CH)
+.endmacro
+
+;;; summary: LoaD AH from DL
+;;; result: AH <- DL
+;;; changed: A , N+ , Z+
+.macro ld_ah_dl
+    ld_b (AH), (DL)
+.endmacro
+
+;;; summary: LoaD AH from DH
+;;; result: AH <- DH
+;;; changed: A , N+ , Z+
+.macro ld_ah_dh
+    ld_b (AH), (DH)
+.endmacro
+
+;;; summary: LoaD BL from AL
+;;; result: BL <- AL
+;;; changed: A , N+ , Z+
+.macro ld_bl_al
+    ld_b (BL), (AL)
+.endmacro
+
+;;; summary: LoaD BL from AH
+;;; result: BL <- AH
+;;; changed: A , N+ , Z+
+.macro ld_bl_ah
+    ld_b (BL), (AH)
+.endmacro
+
+;;; summary: LoaD BL from BH
+;;; result: BL <- BH
+;;; changed: A , N+ , Z+
+.macro ld_bl_bh
+    ld_b (BL), (BH)
+.endmacro
+
+;;; summary: LoaD BL from CL
+;;; result: BL <- CL
+;;; changed: A , N+ , Z+
+.macro ld_bl_cl
+    ld_b (BL), (CL)
+.endmacro
+
+;;; summary: LoaD BL from CH
+;;; result: BL <- CH
+;;; changed: A , N+ , Z+
+.macro ld_bl_ch
+    ld_b (BL), (CH)
+.endmacro
+
+;;; summary: LoaD BL from DL
+;;; result: BL <- DL
+;;; changed: A , N+ , Z+
+.macro ld_bl_dl
+    ld_b (BL), (DL)
+.endmacro
+
+;;; summary: LoaD BL from DH
+;;; result: BL <- DH
+;;; changed: A , N+ , Z+
+.macro ld_bl_dh
+    ld_b (BL), (DH)
+.endmacro
+
+;;; summary: LoaD BH from AL
+;;; result: BH <- AL
+;;; changed: A , N+ , Z+
+.macro ld_bh_al
+    ld_b (BH), (AL)
+.endmacro
+
+;;; summary: LoaD BH from AH
+;;; result: BH <- AH
+;;; changed: A , N+ , Z+
+.macro ld_bh_ah
+    ld_b (BH), (AH)
+.endmacro
+
+;;; summary: LoaD BH from BL
+;;; result: BH <- BL
+;;; changed: A , N+ , Z+
+.macro ld_bh_bl
+    ld_b (BH), (BL)
+.endmacro
+
+;;; summary: LoaD BH from CL
+;;; result: BH <- CL
+;;; changed: A , N+ , Z+
+.macro ld_bh_cl
+    ld_b (BH), (CL)
+.endmacro
+
+;;; summary: LoaD BH from CH
+;;; result: BH <- CH
+;;; changed: A , N+ , Z+
+.macro ld_bh_ch
+    ld_b (BH), (CH)
+.endmacro
+
+;;; summary: LoaD BH from DL
+;;; result: BH <- DL
+;;; changed: A , N+ , Z+
+.macro ld_bh_dl
+    ld_b (BH), (DL)
+.endmacro
+
+;;; summary: LoaD BH from DH
+;;; result: BH <- DH
+;;; changed: A , N+ , Z+
+.macro ld_bh_dh
+    ld_b (BH), (DH)
+.endmacro
+
+;;; summary: LoaD CL from AL
+;;; result: CL <- AL
+;;; changed: A , N+ , Z+
+.macro ld_cl_al
+    ld_b (CL), (AL)
+.endmacro
+
+;;; summary: LoaD CL from AH
+;;; result: CL <- AH
+;;; changed: A , N+ , Z+
+.macro ld_cl_ah
+    ld_b (CL), (AH)
+.endmacro
+
+;;; summary: LoaD CL from BL
+;;; result: CL <- BL
+;;; changed: A , N+ , Z+
+.macro ld_cl_bl
+    ld_b (CL), (BL)
+.endmacro
+
+;;; summary: LoaD CL from BH
+;;; result: CL <- BH
+;;; changed: A , N+ , Z+
+.macro ld_cl_bh
+    ld_b (CL), (BH)
+.endmacro
+
+;;; summary: LoaD CL from CH
+;;; result: CL <- CH
+;;; changed: A , N+ , Z+
+.macro ld_cl_ch
+    ld_b (CL), (CH)
+.endmacro
+
+;;; summary: LoaD CL from DL
+;;; result: CL <- DL
+;;; changed: A , N+ , Z+
+.macro ld_cl_dl
+    ld_b (CL), (DL)
+.endmacro
+
+;;; summary: LoaD CL from DH
+;;; result: CL <- DH
+;;; changed: A , N+ , Z+
+.macro ld_cl_dh
+    ld_b (CL), (DH)
+.endmacro
+
+;;; summary: LoaD CH from AL
+;;; result: CH <- AL
+;;; changed: A , N+ , Z+
+.macro ld_ch_al
+    ld_b (CH), (AL)
+.endmacro
+
+;;; summary: LoaD CH from AH
+;;; result: CH <- AH
+;;; changed: A , N+ , Z+
+.macro ld_ch_ah
+    ld_b (CH), (AH)
+.endmacro
+
+;;; summary: LoaD CH from BL
+;;; result: CH <- BL
+;;; changed: A , N+ , Z+
+.macro ld_ch_bl
+    ld_b (CH), (BL)
+.endmacro
+
+;;; summary: LoaD CH from BH
+;;; result: CH <- BH
+;;; changed: A , N+ , Z+
+.macro ld_ch_bh
+    ld_b (CH), (BH)
+.endmacro
+
+;;; summary: LoaD CH from CL
+;;; result: CH <- CL
+;;; changed: A , N+ , Z+
+.macro ld_ch_cl
+    ld_b (CH), (CL)
+.endmacro
+
+;;; summary: LoaD CH from DL
+;;; result: CH <- DL
+;;; changed: A , N+ , Z+
+.macro ld_ch_dl
+    ld_b (CH), (DL)
+.endmacro
+
+;;; summary: LoaD CH from DH
+;;; result: CH <- DH
+;;; changed: A , N+ , Z+
+.macro ld_ch_dh
+    ld_b (CH), (DH)
+.endmacro
+
+;;; summary: LoaD DL from AL
+;;; result: DL <- AL
+;;; changed: A , N+ , Z+
+.macro ld_dl_al
+    ld_b (DL), (AL)
+.endmacro
+
+;;; summary: LoaD DL from AH
+;;; result: DL <- AH
+;;; changed: A , N+ , Z+
+.macro ld_dl_ah
+    ld_b (DL), (AH)
+.endmacro
+
+;;; summary: LoaD DL from BL
+;;; result: DL <- BL
+;;; changed: A , N+ , Z+
+.macro ld_dl_bl
+    ld_b (DL), (BL)
+.endmacro
+
+;;; summary: LoaD DL from BH
+;;; result: DL <- BH
+;;; changed: A , N+ , Z+
+.macro ld_dl_bh
+    ld_b (DL), (BH)
+.endmacro
+
+;;; summary: LoaD DL from CL
+;;; result: DL <- CL
+;;; changed: A , N+ , Z+
+.macro ld_dl_cl
+    ld_b (DL), (CL)
+.endmacro
+
+;;; summary: LoaD DL from CH
+;;; result: DL <- CH
+;;; changed: A , N+ , Z+
+.macro ld_dl_ch
+    ld_b (DL), (CH)
+.endmacro
+
+;;; summary: LoaD DL from DH
+;;; result: DL <- DH
+;;; changed: A , N+ , Z+
+.macro ld_dl_dh
+    ld_b (DL), (DH)
+.endmacro
+
+;;; summary: LoaD DH from AL
+;;; result: DH <- AL
+;;; changed: A , N+ , Z+
+.macro ld_dh_al
+    ld_b (DH), (AL)
+.endmacro
+
+;;; summary: LoaD DH from AH
+;;; result: DH <- AH
+;;; changed: A , N+ , Z+
+.macro ld_dh_ah
+    ld_b (DH), (AH)
+.endmacro
+
+;;; summary: LoaD DH from BL
+;;; result: DH <- BL
+;;; changed: A , N+ , Z+
+.macro ld_dh_bl
+    ld_b (DH), (BL)
+.endmacro
+
+;;; summary: LoaD DH from BH
+;;; result: DH <- BH
+;;; changed: A , N+ , Z+
+.macro ld_dh_bh
+    ld_b (DH), (BH)
+.endmacro
+
+;;; summary: LoaD DH from CL
+;;; result: DH <- CL
+;;; changed: A , N+ , Z+
+.macro ld_dh_cl
+    ld_b (DH), (CL)
+.endmacro
+
+;;; summary: LoaD DH from CH
+;;; result: DH <- CH
+;;; changed: A , N+ , Z+
+.macro ld_dh_ch
+    ld_b (DH), (CH)
+.endmacro
+
+;;; summary: LoaD DH from DL
+;;; result: DH <- DL
+;;; changed: A , N+ , Z+
+.macro ld_dh_dl
+    ld_b (DH), (DL)
 .endmacro
 
 ; ==============================================================================
@@ -1130,224 +1073,224 @@
 ; ==============================================================================
 
 ;;; summary: STore byte Value into A
-;;; result: A = value
+;;; result: A = Value
 ;;; changed: N+ , Z+
-.macro stva value
-    ldav (value)
+.macro st_v_a Value
+    ld_a_v (Value)
 .endmacro
 
 ;;; summary: STore byte Value into X
-;;; result: X = value
+;;; result: X = Value
 ;;; changed: N+ , Z+
-.macro stvx value
-    ldxv (value)
+.macro st_v_x Value
+    ld_x_v (Value)
 .endmacro
 
 ;;; summary: STore byte Value into Y
-;;; result: Y = value
+;;; result: Y = Value
 ;;; changed: N+ , Z+
-.macro stvy value
-    ldyv (value)
+.macro st_v_y Value
+    ld_y_v (Value)
 .endmacro
 
-;;; summary: STore Value to target Byte
-;;; result: [target] = value
+;;; summary: STore Value to Target Byte
+;;; result: [Target] = Value
 ;;; changed: A , N+ , Z+
-.macro stvb value, target
-    ldbv (target), (value)
+.macro st_v_b Value, Target
+    ld_b_v (Target), (Value)
 .endmacro
 
 ;;; summary: STore Value Word
-;;; result: [target]:w = value
+;;; result: [Target]:w = Value
 ;;; changed: A , N+ , Z+
-.macro stvw value, target
-    ldwv (target), (value)
+.macro st_v_w Value, Target
+    ld_w_v (Target), (Value)
 .endmacro
 
 ;;; summary: STore byte Value into AL
-;;; result: AL = value
+;;; result: AL = Value
 ;;; changed: A , N+ , Z+
-.macro stval value
-    ldalv (value)
+.macro st_v_al Value
+    ld_al_v (Value)
 .endmacro
 
 ;;; summary: STore byte Value into AH
-;;; result: AH = value
+;;; result: AH = Value
 ;;; changed: A , N+ , Z+
-.macro stvah value
-    ldahv (value)
+.macro st_v_ah Value
+    ld_ah_v (Value)
 .endmacro
 
 ;;; summary: STore word Value into AX
-;;; result: AX = value
+;;; result: AX = Value
 ;;; changed: A , N+ , Z+
-.macro stvax value
-    ldaxv (value)
+.macro st_v_ax Value
+    ld_ax_v (Value)
 .endmacro
 
 ;;; summary: STore byte Value into BL
-;;; result: BL = value
+;;; result: BL = Value
 ;;; changed: A , N+ , Z+
-.macro stvbl value
-    ldblv (value)
+.macro st_v_bl Value
+    ld_bl_v (Value)
 .endmacro
 
 ;;; summary: STore byte Value into BH
-;;; result: BH = value
+;;; result: BH = Value
 ;;; changed: A , N+ , Z+
-.macro stvbh value
-    ldbhv (value)
+.macro st_v_bh Value
+    ld_bh_v (Value)
 .endmacro
 
 ;;; summary: STore word Value into BX
-;;; result: BX = value
+;;; result: BX = Value
 ;;; changed: A , N+ , Z+
-.macro stvbx value
-    ldbxv (value)
+.macro st_v_bx Value
+    ld_bx_v (Value)
 .endmacro
 
 ;;; summary: STore byte Value into CL
-;;; result: CL = value
+;;; result: CL = Value
 ;;; changed: A , N+ , Z+
-.macro stdvcl value
-    ldclv (value)
+.macro st_v_cl Value
+    ld_cl_v (Value)
 .endmacro
 
 ;;; summary: STore byte Value into CH
-;;; result: CH = value
+;;; result: CH = Value
 ;;; changed: A , N+ , Z+
-.macro stvch value
-    ldchv (value)
+.macro st_v_ch Value
+    ld_ch_v (Value)
 .endmacro
 
 ;;; summary: STore word Value into CX
-;;; result: CX = value
+;;; result: CX = Value
 ;;; changed: A , N+ , Z+
-.macro stvcx value
-    ldcxv (value)
+.macro st_v_cx Value
+    ld_cx_v (Value)
 .endmacro
 
 ;;; summary: STore byte Value into DL
-;;; result: DL = value
+;;; result: DL = Value
 ;;; changed: A , N+ , Z+
-.macro stvdl value
-    lddlv (value)
+.macro st_v_dl Value
+    ld_dl_v (Value)
 .endmacro
 
 ;;; summary: STore byte Value into DH
-;;; result: DH = value
+;;; result: DH = Value
 ;;; changed: A , N+ , Z+
-.macro stvdh value
-    lddhv (value)
+.macro st_v_dh Value
+    ld_dh_v (Value)
 .endmacro
 
 ;;; summary: STore word Value into DX
-;;; result: DX = value
+;;; result: DX = Value
 ;;; changed: A , N+ , Z+
-.macro stvdx value
-    lddxv (value)
+.macro st_v_dx Value
+    ld_dx_v (Value)
 .endmacro
 
 ; ==============================================================================
 ; Synthetic instuctions - Store memory values
 ; ==============================================================================
 
-;;; summary: STore memory source into target Byte
-;;; result: [target] <- [source]
+;;; summary: STore memory Source into Target Byte
+;;; result: [Target] <- [Source]
 ;;; changed: A , N+ , Z+
-.macro stb source, target
-    ldb (target), (source)
+.macro st_b Source, Target
+    ld_b (Target), (Source)
 .endmacro
 
-;;; summary: Store memory source into target Word
-;;; result: [target]:w <- [source]:w
+;;; summary: Store memory Source into Target Word
+;;; result: [Target]:w <- [Source]:w
 ;;; changed: A , N+ , N+
-.macro stw source, target
-    ldw (target), (source)
+.macro st_w Source, Target
+    ld_w (Target), (Source)
 .endmacro
 
-;;; summary: STore AL into target Byte
-;;; result: [target] <- AL
+;;; summary: STore AL into Target Byte
+;;; result: [Target] <- AL
 ;;; changed: A , N+ , Z+
-.macro stal target
-    stb AL, (target)
+.macro st_al Target
+    st_b (AL), (Target)
 .endmacro
 
-;;; summary: STore AH into target Byte
-;;; result: [target] <- AH
+;;; summary: STore AH into Target Byte
+;;; result: [Target] <- AH
 ;;; changed: A , N+ , Z+
-.macro stah target
-    stb AH, (target)
+.macro st_ah Target
+    st_b (AH), (Target)
 .endmacro
 
-;;; summary: STore AX into target Word
-;;; result: [target]:w <- AX
+;;; summary: STore AX into Target Word
+;;; result: [Target]:w <- AX
 ;;; changed: A , N+ , Z+
-.macro stax target
-    stw AX, (target)
+.macro st_ax Target
+    st_w (AX), (Target)
 .endmacro
 
-;;; summary: STore BL into target Byte
-;;; result: [target] <- BL
+;;; summary: STore BL into Target Byte
+;;; result: [Target] <- BL
 ;;; changed: A , N+ , Z+
-.macro stbl target
-    stb BL, (target)
+.macro st_bl Target
+    st_b (BL), (Target)
 .endmacro
 
-;;; summary: STore BH into target Byte
-;;; result: [target] <- BH
+;;; summary: STore BH into Target Byte
+;;; result: [Target] <- BH
 ;;; changed: A , N+ , Z+
-.macro stbh target
-    stb BH, (target)
+.macro st_bh Target
+    st_b (BH), (Target)
 .endmacro
 
-;;; summary: STore BX into target Word
-;;; result: [target]:w <- BX
+;;; summary: STore BX into Target Word
+;;; result: [Target]:w <- BX
 ;;; changed: A , N+ , Z+
-.macro stbx target
-    stw BX, (target)
+.macro st_bx Target
+    st_w (BX), (Target)
 .endmacro
 
-;;; summary: STore CL into target Byte
-;;; result: [target] <- CL
+;;; summary: STore CL into Target Byte
+;;; result: [Target] <- CL
 ;;; changed: A , N+ , Z+
-.macro stcl target
-    stb CL, (target)
+.macro st_cl Target
+    st_b (CL), (Target)
 .endmacro
 
-;;; summary: STore CH into target Byte
-;;; result: [target] <- CH
+;;; summary: STore CH into Target Byte
+;;; result: [Target] <- CH
 ;;; changed: A , N+ , Z+
-.macro stch target
-    stb CH, (target)
+.macro st_ch Target
+    st_b (CH), (Target)
 .endmacro
 
-;;; summary: STore CX into target Word
-;;; result: [target]:w <- CX
+;;; summary: STore CX into Target Word
+;;; result: [Target]:w <- CX
 ;;; changed: A , N+ , Z+
-.macro stcx target
-    stw CX, (target)
+.macro st_cx Target
+    st_w (CX), (Target)
 .endmacro
 
-;;; summary: STore DL into target Byte
-;;; result: [target] <- DL
+;;; summary: STore DL into Target Byte
+;;; result: [Target] <- DL
 ;;; changed: A , N+ , Z+
-.macro stdl target
-    stb DL, (target)
+.macro st_dl Target
+    st_b (DL), (Target)
 .endmacro
 
-;;; summary: STore DH into target Byte
-;;; result: [target] <- DH
+;;; summary: STore DH into Target Byte
+;;; result: [Target] <- DH
 ;;; changed: A , N+ , Z+
-.macro stdh target
-    stb DH, (target)
+.macro st_dh Target
+    st_b (DH), (Target)
 .endmacro
 
-;;; summary: STore DX into target Word
-;;; result: [target]:w <- DX
+;;; summary: STore DX into Target Word
+;;; result: [Target]:w <- DX
 ;;; changed: A , N+ , Z+
-.macro stdx target
-    stw DX, (target)
+.macro st_dx Target
+    st_w (DX), (Target)
 .endmacro
 
 ; ==============================================================================
@@ -1355,20 +1298,20 @@
 ; ==============================================================================
 
 ;;; summary: Reverse subtract A Value
-;;; result: A <- V - A
+;;; result: A <- Value - A
 ;;; bytes: 5-6
 ;;; cycles: 4-10
-.macro revsubav V
+.macro revsub_a_v Value
     oca
     sec
-    adc # V
+    adc # 0 + (Value)
 .endmacro
 
 ;;; summary: Reverse subtract A memory Byte
 ;;; result: A <- [M] - A
 ;;; bytes: 5-6
 ;;; cycles: 4-10
-.macro revsuba M
+.macro revsub_a M
     oca
     sec
     adc 0 + (M)
@@ -1378,58 +1321,33 @@
 ;;; result: [M]:w <- [M]:w + 1
 ;;; bytes: zp: 6 , ab: 8
 ;;; cycles: zp: 12-14 , ab: 14-16
-.macro inw M
+;;; changed: Z=0 unless you inc $FFFF
+.macro inc_w M
     inc 0 + (M)
     bne :+
     inc 1 + (M)
     :
 .endmacro
 
-;;; summary: INCrement memory Word
-;;; result: [M]:w <- [M]:w + 1
-;;; bytes: zp: 6 , ab: 8
-;;; cycles: zp: 12-14 , ab: 14-16
-;;; changed:
-;;;   NE unless you inc $FFFF
-.macro incw M
-    inw M
-.endmacro
-
-.macro incax
-    incw AX
-.endmacro
-
 .macro inc_ax
-    incax
-.endmacro
-
-.macro incbx
-    incw BX
+    inc_w (AX)
 .endmacro
 
 .macro inc_bx
-    incbx
-.endmacro
-
-.macro inccx
-    incw CX
+    inc_w (BX)
 .endmacro
 
 .macro inc_cx
-    inccx
-.endmacro
-
-.macro incdx
-    incw DX
+    inc_w (CX)
 .endmacro
 
 .macro inc_dx
-    incdx
+    inc_w (DX)
 .endmacro
 
 ;;; summary: DEcrement memory Word
 ;;; result: [M]:w <- [M]:w - 1
-.macro dew M
+.macro dec_w M
     lda 0 + (M)
     bne :+
     dec 1 + (M)
@@ -1437,31 +1355,25 @@
     dec 0 + (M)
 .endmacro
 
-;;; summary: DECrement memory Word
-;;; result: [M]:w <- [M]:w - 1
-.macro decw M
-    dew M
+.macro dec_ax
+    dec_w (AX)
 .endmacro
 
-.macro decax
-    decw AX
+.macro dec_bx
+    dec_w (BX)
 .endmacro
 
-.macro decbx
-    decw BX
+.macro dec_cx
+    decw (CX)
 .endmacro
 
-.macro deccx
-    decw CX
+.macro dec_dx
+    decw (DX)
 .endmacro
 
-.macro decdx
-    decw DX
-.endmacro
-
-;;; summary: add to unsigned word the signed byte A
+;;; summary: add to unsigned word the signed byte in A
 ;;; result: [UW]:uw <- [UW]:uw + A:sb
-;;; see: http://forums.nesdev.com/viewtopic.php?t=10975
+;;; see: http://forums.nesdev.com/viewtopic.php_?t=10975
 ;;; result: N+ Z+ from UW:hi
 .macro add_uw_sa UW
     bpl :+
@@ -1477,140 +1389,140 @@
 
 ;;; summary: Add to AL value of A (with clear C)
 ;;; result: AL <- A + AL with C=0
-.macro addala
+.macro add_al_a
     clc
-    adc AL
-    sta AL
+    adc (AL)
+    sta (AL)
 .endmacro
 
 ;;; summary: Add to AH value of A (with clear C)
 ;;; result: AH <- A + AH with C=0
-.macro addaha
+.macro add_ah_a
     clc
-    adc AH
-    sta AH
+    adc (AH)
+    sta (AH)
 .endmacro
 
 ;;; summary: Add to BL value of A (with clear C)
 ;;; result: BL <- A + BL with C=0
-.macro addbla
+.macro add_bl_a
     clc
-    adc BL
-    sta BL
+    adc (BL)
+    sta (BL)
 .endmacro
 
 ;;; summary: Add to BH value of A (with clear C)
 ;;; result: BH <- A + BH with C=0
-.macro addbha
+.macro add_bh_a
     clc
-    adc BH
-    sta BH
+    adc (BH)
+    sta (BH)
 .endmacro
 
 ;;; summary: Add to CL value of A (with clear C)
 ;;; result: CL <- A + CL with C=0
-.macro addcla
+.macro add_cl_a
     clc
-    adc CL
-    sta CL
+    adc (CL)
+    sta (CL)
 .endmacro
 
 ;;; summary: Add to CH value of A (with clear C)
 ;;; result: CH <- A + CH with C=0
-.macro addcha
+.macro add_ch_a
     clc
-    adc CH
-    sta CH
+    adc (CH)
+    sta (CH)
 .endmacro
 
 ;;; summary: Add to DL value of A (with clear C)
 ;;; result: DL <- A + DL with C=0
-.macro adddla
+.macro add_dl_a
     clc
-    adc DL
-    sta DL
+    adc (DL)
+    sta (DL)
 .endmacro
 
 ;;; summary: Add to DH value of A (with clear C)
 ;;; result: DH <- A + DH with C=0
-.macro adddha
+.macro add_dh_a
     clc
-    adc DH
-    sta DH
+    adc (DH)
+    sta (DH)
 .endmacro
 
 ;;; summary: Add to AX the constant value V
-.macro addaxv V
+.macro add_ax_v Value
     clc
-    lda AL
-    adc # < (V)
-    sta AL
-    lda AH
-    adc # > (V)
-    sta AH
+    lda (AL)
+    adc # < (Value)
+    sta (AL)
+    lda (AH)
+    adc # > (Value)
+    sta (AH)
 .endmacro
 
 ;;; summary: Add to BX the constant value V
-.macro addbxv V
+.macro add_bx_v Value
     clc
-    lda BL
-    adc # < (V)
-    sta BL
-    lda BH
-    adc # > (V)
-    sta BH
+    lda (BL)
+    adc # < (Value)
+    sta (BL)
+    lda (BH)
+    adc # > (Value)
+    sta (BH)
 .endmacro
 
 ;;; summary: Add to CX the constant value V
-.macro addcxv V
+.macro add_cx_v Value
     clc
-    lda CL
-    adc # < (V)
-    sta CL
-    lda CH
-    adc # > (V)
-    sta CH
+    lda (CL)
+    adc # < (Value)
+    sta (CL)
+    lda (CH)
+    adc # > (Value)
+    sta (CH)
 .endmacro
 
 ;;; summary: Add to DX the constant value V
-.macro adddxv V
+.macro add_dx_v Value
     clc
-    lda DL
-    adc # < (V)
-    sta DL
-    lda DH
-    adc # > (V)
-    sta DH
+    lda (DL)
+    adc # < (Value)
+    sta (DL)
+    lda (DH)
+    adc # > (Value)
+    sta (DH)
 .endmacro
 
 ; ==============================================================================
 ; Synthetic instuctions - Control flow
 ; ==============================================================================
 
-;;; summary JuMP to address stored at M + X
+;;; summary JuMP to address stored at M + X (Absolute indexed by X)
 ;;; result: PC <- [M + X]:w
 ;;; bytes:  zp:  8 , ab: 10
 ;;; cycles: zp: 23 , ab: 23-26
-.macro jmpx M
+.macro jmp_ax M
     lda 1 + (M),x
     pha
     lda 0 + (M),x
     pha
-    php
+    php_
     rti
 .endmacro
 
 ;;; summary: Skip next byte
 ;;; changed: N+ V+ Z+
 ;;; notes: C-
-.macro skip1
+.macro skip_1
     .byte OPCODE_BIT_ZP
 .endmacro
 
 ;;; summary: Skip next 2 bytes
 ;;; changed: N+ V+ Z+
 ;;; notes: C-
-.macro skip2
+.macro skip_2
     .byte OPCODE_BIT_AB
 .endmacro
 
@@ -1639,7 +1551,7 @@
 ;;; summary: End pushing parameters
 ;;; result: [RSP] <- X
 .macro END_PUSH
-    stx RSP
+    stx (RSP)
 .endmacro
 
 ;;; summary: Reset frame  discard any pushed parameters
@@ -1647,8 +1559,8 @@
 ;;; bytes: 
 ;;; cycles: 
 .macro RESET_FRAME
-    ldx FP
-    stx RSP
+    ldx (FP)
+    stx (RSP)
 .endmacro
 
 ;;; summary: Declare 1 local variable
@@ -1656,16 +1568,16 @@
 ;;; cycles: 
 .macro FRAME_DECLARE_1_LOCAL_VAR
     inx
-    stx FP
-    stx RSP
+    stx (FP)
+    stx (RSP)
 .endmacro
 
 .macro FRAME_DECLARE_1_LOCAL_VAR_INIT_0
     lda # 0
     sta 0 , x
     inx
-    stx FP
-    stx RSP
+    stx (FP)
+    stx (RSP)
 .endmacro
 
 ;;; summary: Declare 2 local variables
@@ -1674,8 +1586,8 @@
 .macro FRAME_DECLARE_2_LOCAL_VAR
     inx
     inx
-    stx FP
-    stx RSP
+    stx (FP)
+    stx (RSP)
 .endmacro
 
 .macro FRAME_DECLARE_2_LOCAL_VAR_INIT_0
@@ -1684,8 +1596,8 @@
     inx
     sta 0 , x
     inx
-    stx FP
-    stx RSP
+    stx (FP)
+    stx (RSP)
 .endmacro
 
 ;;; summary: Declare 3 local variables
@@ -1695,8 +1607,8 @@
     inx
     inx
     inx
-    stx FP
-    stx RSP
+    stx (FP)
+    stx (RSP)
 .endmacro
 
 .macro FRAME_DECLARE_3_LOCAL_VAR_INIT_0
@@ -1707,8 +1619,8 @@
     inx
     sta 0 , x
     inx
-    stx FP
-    stx RSP
+    stx (FP)
+    stx (RSP)
 .endmacro
 
 ;;; summary: Declare 4 local variables
@@ -1719,8 +1631,8 @@
     inx
     inx
     inx
-    stx FP
-    stx RSP
+    stx (FP)
+    stx (RSP)
 .endmacro
 
 .macro FRAME_DECLARE_4_LOCAL_VAR_INIT_0
@@ -1733,8 +1645,8 @@
     inx
     sta 0 , x
     inx
-    stx FP
-    stx RSP
+    stx (FP)
+    stx (RSP)
 .endmacro
 
 ;;; summary: Declare N local variables, best for N >= 5
@@ -1745,8 +1657,8 @@
     clc
     adc # (Count)
     txa
-    stx FP
-    stx RSP
+    stx (FP)
+    stx (RSP)
 .endmacro
 
 ; ==============================================================================
@@ -1754,30 +1666,26 @@
 ; ==============================================================================
 
 ;;; summary: PusH Parameter Value Byte
-;;; result: [old X] <- value , X = old X + 1
+;;; result: [old X] <- Value , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpvb Value
+.macro php_v_b Value
     lda # (Value)
     inx
-    sta z: < -1,x
-.endmacro
-
-.macro php_vb Value
-    phpvb Value
+    sta z: < -1 , x
 .endmacro
 
 ;;; summary: PusH Parameter Value Word
-;;; result: [old X]w = value:w , X = old X + 2
+;;; result: [old X]w = Value:w , X = old X + 2
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpvw value
-    lda # < (value)
+.macro php_v_w Value
+    lda # < (Value)
     inx
-    sta z: < -1,x
-    lda # > (value)
+    sta z: < -1 , x
+    lda # > (Value)
     inx
-    sta z: < -1,x
+    sta z: < -1 , x
 .endmacro
 
 ; ==============================================================================
@@ -1788,13 +1696,9 @@
 ;;; result: [old X] = A, X = old X + 1
 ;;; changed: N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpa
-    inx
-    sta z: < -1,x
-.endmacro
-
 .macro php_a
-    phpa
+    inx
+    sta z: < -1 , x
 .endmacro
 
 ;;; summary:  PusH Parameter Y
@@ -1802,130 +1706,130 @@
 ;;; changed: P:N+Z+
 ;;; changed: N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpy
+.macro php_y
     inx
-    sty z: < -1,x
+    sty z: < -1 , x
 .endmacro
 
 ;;; summary: PusH Parameter Byte
-;;; result: [old X] = [source] , X = old X + 1
+;;; result: [old X] = [Source] , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpb source
-    lda 0 + (source)
+.macro php_b Source
+    lda 0 + (Source)
     inx
     sta z: < -1,x
 .endmacro
 
 ;;; summary: PusH Parameter Word
-;;; result: [old X]:w = [source]:w , X = old X + 2
+;;; result: [old X]:w = [Source]:w , X = old X + 2
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpw source
+.macro php_w Source
     ; lo
-    lda 0 + (source)
+    lda 0 + (Source)
     inx
-    sta z: < -1,x
+    sta z: < -1 , x
     ; hi
-    lda 1 + (source)
+    lda 1 + (Source)
     inx
-    sta z: < -1,x
+    sta z: < -1 , x
 .endmacro
 
 ;;; summary: PusH Parameter AL
 ;;; result: [old X] = AL , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpal
-    phpb AL
+.macro php_al
+    php_b (AL)
 .endmacro
 
 ;;; summary: PusH Parameter AH
 ;;; result: [old X] = AH , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpah
-    phpb AH
+.macro php_ah
+    php_b (AH)
 .endmacro
 
 ;;; summary: PusH Parameter AX
 ;;; result: [old X]:w = AX , X = old X + 2
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpax
-    phpw AX
+.macro php_ax
+    php_w (AX)
 .endmacro
 
 ;;; summary: PusH Parameter BL
 ;;; result: [old X] = BL , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpbl
-    phpb BL
+.macro php_bl
+    php_b (BL)
 .endmacro
 
 ;;; summary: PusH Parameter BH
 ;;; result: [old X] = BH , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpbh
-    phpb BH
+.macro php_bh
+    php_b BH
 .endmacro
 
 ;;; summary: PusH Parameter BX
 ;;; result: [old X]:w = BX , X = old X + 2
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpbx
-    phpw BX
+.macro php_bx
+    php_w BX
 .endmacro
 
 ;;; summary: PusH Parameter CL
 ;;; result: [old X] = CL , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpcl
-    phpb CL
+.macro php_cl
+    php_b CL
 .endmacro
 
 ;;; summary: PusH Parameter CH
 ;;; result: [old X] = CH , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpch
-    phpb CH
+.macro php_ch
+    php_b CH
 .endmacro
 
 ;;; summary: PusH Parameter CX
 ;;; result: [old X]:w = CX , X = old X + 2
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpcx
-    phpw CX
+.macro php_cx
+    php_w CX
 .endmacro
 
 ;;; summary: PusH Parameter DL
 ;;; result: [old X] = DL , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpdl
-    phpb DL
+.macro php_dl
+    php_b DL
 .endmacro
 
 ;;; summary: PusH Parameter DH
 ;;; result: [old X] = DH , X = old X + 1
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpdh
-    phpb DH
+.macro php_dh
+    php_b DH
 .endmacro
 
 ;;; summary: PusH Parameter DX
 ;;; result: [old X]:w = DX , X = old X + 2
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro phpdx
-    phpw DX
+.macro php_dx
+    php_w DX
 .endmacro
 
 ; ==============================================================================
@@ -1952,25 +1856,25 @@
 .endmacro
 
 ;;; summary: PuLl Parameter Byte
-;;; result: X = old X - 1 , [source] = [X]
+;;; result: X = old X - 1 , [Source] = [X]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro plpb source
+.macro plpb Source
     lda z: < -1,x
-    sta 0 + (source)
+    sta 0 + (Source)
     dex
 .endmacro
 
 ;;; summary: Pull Parameter Word
-;;; result: X = old X - 2 , [source]:w = [X]:w
+;;; result: X = old X - 2 , [Source]:w = [X]:w
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
-.macro plpw source
+.macro plpw Source
     lda z: < -1,x
-    sta 1 + (source)
+    sta 1 + (Source)
     dex
     lda z: < -1,x
-    sta 0 + (source)
+    sta 0 + (Source)
     dex
 .endmacro
 
@@ -2003,7 +1907,7 @@
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [RSP]
 .macro plpbl
-    plpb BL
+    plpb (BL)
 .endmacro
 
 ;;; summary: Pull Parameter BH
@@ -2071,150 +1975,146 @@
 .endmacro
 
 ; ==============================================================================
-; Synthetic instructions - Load target (A, Y, B, W, al, ...) from parameter
+; Synthetic instructions - Load Target (A, Y, B, W, al, ...) from parameter
 ; ==============================================================================
 
 ;;; summary: LoaD A from Parameter
 ;;; result: A <- [X + parameter]
 ;;; changed: N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldap parameter
-    lda z: < (0 + (parameter)) ,x
-.endmacro
-
-.macro lda_p parameter
-    ldap parameter
+.macro ld_a_p Parameter
+    lda z: < (0 + (Parameter)) ,x
 .endmacro
 
 ;;; summary: LoaD Y from Parameter
 ;;; result: Y <- [X + parameter]
 ;;; changed: N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldyp parameter
-    ldy z: < (0 + (parameter)) ,x
+.macro ld_y_p Parameter
+    ldy z: < (0 + (Parameter)) ,x
 .endmacro
 
 ;;; summary: LoaD Byte from Parameter
-;;; result: [target] <- [X + parameter]
+;;; result: [Target] <- [X + parameter]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldbp target, parameter
-    lda z: < (0 + (parameter)),x
-    sta 0 + (target)
+.macro ld_b_p Target, parameter
+    lda z: < (0 + (Parameter)),x
+    sta 0 + (Target)
 .endmacro
 
 ;;; summary: LoaD Word from Parameter
-;;; result:  [target]:w <- [X + parameter]:w
+;;; result:  [Target]:w <- [X + parameter]:w
 ;;; changed: A , P:N+Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldwp target, parameter
-    lda z: < (0 + (parameter)) ,x
-    sta 0 + (target)
-    lda z: < (1 + (parameter)),x
-    sta 1 + (target)
+.macro ld_w_p Target, parameter
+    lda z: < (0 + (Parameter)) ,x
+    sta 0 + (Target)
+    lda z: < (1 + (Parameter)),x
+    sta 1 + (Target)
 .endmacro
 
 ;;; summary: LoaD AL from Parameter
 ;;; result: AL <- [X + parameter]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldalp parameter
-    ldbp AL, (parameter)
+.macro ld_al_p Parameter
+    ld_b_p AL, (Parameter)
 .endmacro
 
 ;;; summary: LoaD AH from Parameter
 ;;; result: AH <- [X + parameter]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldahp parameter
-    ldbp AH, (parameter)
+.macro ld_ah_p Parameter
+    ld_b_p AH, (Parameter)
 .endmacro
 
 ;;; summary: LoaD AX from Parameter
 ;;; result: AX <- [X + parameter]:w
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldaxp parameter
-    ldwp AX, (parameter)
+.macro ld_ax_p Parameter
+    ld_w_p (AX), (Parameter)
 .endmacro
 
 ;;; summary: LoaD BL from Parameter
 ;;; result: BL <- [X + parameter]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldblp parameter
-    ldbp BL, (parameter)
+.macro ld_bl_p Parameter
+    ld_b_p (BL), (Parameter)
 .endmacro
 
 ;;; summary: LoaD BH from Parameter
 ;;; result: BH <- [X + offset]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldbhp parameter
-    ldbp BH, (parameter)
+.macro ld_bh_p Parameter
+    ld_b_p (BH), (Parameter)
 .endmacro
 
 ;;; summary: LoaD BX from Parameter
 ;;; result: BX <- [X + offset]:w
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldbxp parameter
-    ldwp BX, (parameter)
+.macro ld_bx_p Parameter
+    ld_w_p (BX), (Parameter)
 .endmacro
 
 ;;; summary: LoaD CL from Parameter
 ;;; result: CL <- [X + parameter]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldclp parameter
-    ldbp CL, (parameter)
+.macro ld_cl_p Parameter
+    ld_b_p (CL), (Parameter)
 .endmacro
 
 ;;; summary: LoaD CH from Parameter
 ;;; result: CH <- [X + parameter]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldchp parameter
-    ldbp CH, (parameter)
+.macro ld_ch_p Parameter
+    ld_b_p (CH), (Parameter)
 .endmacro
 
 ;;; summary: LoaD CX from Parameter
 ;;; result: CX <- [X + parameter]:w
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldcxp parameter
-    ldwp CX, (parameter)
+.macro ld_cx_p Parameter
+    ld_w_p (CX), (Parameter)
 .endmacro
 
 ;;; summary: LoaD DL from Parameter
 ;;; result: DL <- [X + parameter]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro lddlp parameter
-    ldbp DL, (parameter)
+.macro ld_dl_p Parameter
+    ld_b_p (DL), (Parameter)
 .endmacro
 
 ;;; summary: LoaD DH from Parameter
 ;;; result: DH <- [X + parameter]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro lddhp parameter
-    ldbp DH, (parameter)
+.macro ld_dh_p Parameter
+    ld_b_p (DH), (Parameter)
 .endmacro
 
 ;;; summary: LoaD DX from Parameter
 ;;; result: DX <- [X + parameter]:w
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro lddxp parameter
-    ldwp DX, (parameter)
+.macro ld_dx_p Parameter
+    ld_w_p (DX), (Parameter)
 .endmacro
 
 ;;; summary: LoaD Parameter with Value Byte
 ;;; result: [X + parameter] <- Value
 ;;; changed:
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldp_vb Parameter, Value
+.macro ld_p_v_b Parameter, Value
     lda # (Value)
     sta z: < (0 + (Parameter)) , x
 .endmacro
@@ -2223,9 +2123,25 @@
 ;;; result: [X + parameter] <- [Address]
 ;;; changed:
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro ldp_mb Parameter, Address
+.macro ld_p_b Parameter, Address
     lda (Address)
     sta z: < (0 + (Parameter)) , x
+.endmacro
+
+;;; summary: LoaD Target Parameter from Source Parameter (Byte)
+;;; changed: A+ N+ Z+
+.macro ld_p_p_b Target, Source
+    lda z: < (0 + (Source)) , x
+    sta z: < (0 + (Target)) , x
+.endmacro
+
+;;; summary: LoaD Target Parameter from Source Parameter (Word)
+;;; changed: A+ N+ Z+
+.macro ld_p_p_w Target, Source
+    lda z: < (0 + (Source)) , x
+    sta z: < (0 + (Target)) , x
+    lda z: < (1 + (Source)),x
+    lda z: < (1 + (Target)),x
 .endmacro
 
 ; ==============================================================================
@@ -2236,338 +2152,300 @@
 ;;; result: [X + parameter] <- A
 ;;; changed:
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stap parameter
-    sta z: < (0 + (parameter)) , x
-.endmacro
-
-.macro sta_p parameter
-    stap parameter
+.macro st_a_p Parameter
+    sta z: < (0 + (Parameter)) , x
 .endmacro
 
 ;;; summary: STore Y into Parameter
 ;;; result: [X + parameter] <- Y
 ;;; changed:
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro styp parameter
-    sty z: < (0 + (parameter)) , x
+.macro st_y_p Parameter
+    sty z: < (0 + (Parameter)) , x
 .endmacro
 
 ;;; summary: STore Byte into Parameter
-;;; result: [X + parameter] <- [source]
+;;; result: [X + parameter] <- [Source]
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stbp source, parameter
-    lda 0 + (source)
-    sta z: < (0 + (parameter)) , x
+.macro st_b_p Source, parameter
+    lda 0 + (Source)
+    sta z: < (0 + (Parameter)) , x
 .endmacro
 
 ;;; summary: STore Word into Parameter
-;;; result: [X + parameter]:w [source]:w
+;;; result: [X + parameter]:w [Source]:w
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stwp source, parameter
-    lda 0 + (source)
-    sta z: < (0 + (parameter)) , x
-    lda 1 + (source)
-    sta z: < (1 + (parameter)) , x
+.macro st_w_p Source, parameter
+    lda 0 + (Source)
+    sta z: < (0 + (Parameter)) , x
+    lda 1 + (Source)
+    sta z: < (1 + (Parameter)) , x
 .endmacro
 
 ;;; summary: STore AL into Parameter
 ;;; result: [X + parameter] <- AL
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stalp parameter
-    stbp AL, (parameter)
+.macro st_al_p Parameter
+    st_b_p (AL), (Parameter)
 .endmacro
 
 ;;; summary: STore AH into Parameter
 ;;; result: [X + parameter] <- AH
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stahp parameter
-    stbp AH, (parameter)
+.macro st_ah_p Parameter
+    st_b_p (AH), (Parameter)
 .endmacro
 
 ;;; summary: STore AX into Parameter
 ;;; result: [X + parameter]:w <- AX
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro staxp source
-    stwp AX, (source)
+.macro st_ax_p Source
+    st_w_p (AX), (Source)
 .endmacro
 
 ;;; summary: STore BL into Parameter
 ;;; result: [X + parameter] <- BL
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stblp parameter
-    stbp BL, (parameter)
+.macro st_bl_p Parameter
+    st_b_p (BL), (Parameter)
 .endmacro
 
 ;;; summary: STore BH into Parameter
 ;;; result: [X + parameter] <- BH
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stbhp parameter
-    stbp BH, (parameter)
+.macro st_bh_p Parameter
+    st_b_p (BH), (Parameter)
 .endmacro
 
 ;;; summary: STore BX into Parameter
 ;;; result: [X + parameter]:w <- BX
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stbxp parameter
-    stwp BX, (parameter)
+.macro st_bx_p Parameter
+    st_w_p (BX), (Parameter)
 .endmacro
 
 ;;; summary: STore CL into Parameter
 ;;; result: [X + parameter] <- CL
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stclp parameter
-    stbp CL, (parameter)
+.macro st_cl_p Parameter
+    st_b_p (CL), (Parameter)
 .endmacro
 
 ;;; summary: STore CH into Parameter
 ;;; result: [X + parameter] <- CH
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stchp parameter
-    stbp CH, (parameter)
+.macro st_ch_p Parameter
+    st_b_p (CH), (Parameter)
 .endmacro
 
 ;;; summary: STore CX into Parameter
 ;;; result: [X + parameter]:w <- CX
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stcxp parameter
-    stwp CX, (parameter)
+.macro st_cx_p Parameter
+    st_w_p (CX), (Parameter)
 .endmacro
 
 ;;; summary: STore DL into Parameter
 ;;; result: [X + parameter] <- CL
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stdlp parameter
-    stbp DL, (parameter)
+.macro st_dl_p Parameter
+    st_b_p (DL), (Parameter)
 .endmacro
 
 ;;; summary: STore HH into Parameter
 ;;; result: [X + parameter] <- CH
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stdhp parameter
-    stbp DH, (parameter)
+.macro st_dh_p Parameter
+    st_b_p (DH), (Parameter)
 .endmacro
 
 ;;; summary: STore DX into Parameter
 ;;; result: [X + parameter]:w <- DX
 ;;; changed: A , N+ , Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro stdxp parameter
-    stwp DX, (parameter)
+.macro st_dx_p Parameter
+    st_w_p (DX), (Parameter)
 .endmacro
 
 ; ==============================================================================
-; Synthetic instructions - Parameters operations
+; Synthetic instructions - Parameters operations Byte with A
 ; ==============================================================================
-
-;;; summary: ADD with cleared carry Parameter to A
-;;; result: A,C <- A + [X + parameter] + C
-;;; changed: N+ V+ C+ Z+
-;;; notes: Assumes X is cached [FP]/[RSP]
-.macro addapa parameter
-    clc
-    adc z: < (0 + (parameter)) , x
-.endmacro
 
 ;;; summary: ADd with Carry Parameter to A
 ;;; result: A,C <- A + [X + parameter] + C
 ;;; changed: N+ V+ C+ Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro adcapa parameter
-    adc z: < (0 + (parameter)) , x
+.macro adc_p Parameter
+    adc z: < (0 + (Parameter)) , x
+.endmacro
+
+;;; summary: ADD with cleared carry Parameter to A
+;;; result: A,C <- A + [X + parameter] + C
+;;; changed: N+ V+ C+ Z+
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro add_p Parameter
+    clc
+    adc_p (Parameter)
 .endmacro
 
 ;;; summary: AND of A and value of Parameter to A
 ;;; result: A <- A & [X + parameter]
 ;;; changed: N+ Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro andapa parameter
-    and z: < (0 + (parameter)) , x
-.endmacro
-
-;;; summary: Arithmic Shift Left Parameter
-;;; result: @parameter <- @parameter << 1
-;;; changed: N+ Z+
-;;; notes: Assumes X is cached [FP]/[RSP]
-.macro aslp parameter
-    asl z: < (0 + (parameter)) , x
+.macro and_p Parameter
+    and z: < (0 + (Parameter)) , x
 .endmacro
 
 ;;; summary: CoMPare A with Parameter
 ;;; result: [X + parameter] <- A
 ;;; changed: N+ C+ Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro cmpap parameter
-    cmp z: < (0 + (parameter)) , x
-.endmacro
-
-;;; summary: DECrement Parameter
-;;; result: @parameter <- @parameter - 1
-;;; changed: N+ Z+
-;;; notes: Assumes X is cached [FP]/[RSP]
-.macro decp parameter
-    dec z: < (0 + (parameter)) , x
-.endmacro
-
-.macro dec_p Parameter
-    decp Parameter
+.macro cmp_p Parameter
+    cmp z: < (0 + (Parameter)) , x
 .endmacro
 
 ;;; summary: Exclusive OR A with Parameter to A
 ;;; result: A <- A ^ @parameter
 ;;; changed: N+ Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro eorapa parameter
-    eor z: < (0 + (parameter)) , x
-.endmacro
-
-;;; summary: INCrement Parameter
-;;; result: @parameter <- @parameter + 1
-;;; changed: N+ Z+
-;;; notes: Assumes X is cached [FP]/[RSP]
-.macro incp parameter
-    inc z: < (0 + (parameter)) , x
-.endmacro
-
-.macro inc_p Parameter
-    incp Parameter
-.endmacro
-
-;;; summary: INCrement Parameter Byte
-;;; result: @parameter <- @parameter + 1
-;;; changed: N+ Z+
-;;; notes: Assumes X is cached [FP]/[RSP]
-.macro incpb parameter
-    incp parameter
-.endmacro
-
-;;; summary: INCrement Parameter Word
-;;; result: @parameter:w <- @parameter:w + 1
-;;; changed: N+ Z+
-;;; notes: Assumes X is cached [FP]/[RSP]
-.macro incpw parameter
-    inc z: < (0 + (parameter)) , x
-    bne :+
-    inc z: < (1 + (parameter)) , x
-    :
-.endmacro
-
-;;; summary: Logical Shift Right Parameter (unsigned)
-;;; result: @parameter <- @parameter >>1
-;;; changed: N+ Z+
-;;; notes: Assumes X is cached [FP]/[RSP]
-.macro lsrp parameter
-    lsr z: < (0 + (parameter)) , x
+.macro eor_p Parameter
+    eor z: < (0 + (Parameter)) , x
 .endmacro
 
 ;;; summary: OR A with Parameter to A
 ;;; result: A <- A | @parameter
 ;;; changed: N+ Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro orapa parameter
-    ora z: < (0 + (parameter)) , x
-.endmacro
-
-.macro ora_p parameter
-    orapa parameter
-.endmacro
-
-;;; summary: ROtate Left Parameter
-;;; result: C <- @parameter[76543210] <- C
-;;; changed: N+ C+ Z+
-;;; notes: Assumes X is cached [FP]/[RSP]
-.macro rolp parameter
-    rol z: < (0 + (parameter)) , x
-.endmacro
-
-;;; summary: ROtate Right Parameter
-;;; result: C -> @parameter[76543210] -> C
-;;; changed: N+ C+ Z+
-;;; notes: Assumes X is cached [FP]/[RSP]
-.macro rorp parameter
-    ror z: < (0 + (parameter)) , x
-.endmacro
-
-.macro ror_p parameter
-    rorp parameter
+.macro ora_p Parameter
+    ora z: < (0 + (Parameter)) , x
 .endmacro
 
 ;;; summary: SuBtract with Carry Parameter from A to A
 ;;; result: A <- A - @parameter - C
 ;;; changed: N+ V+ C+ Z+
 ;;; notes: Assumes X is cached [FP]/[RSP]
-.macro sbcapa parameter
-    sbc z: < (0 + (parameter)) , x
+.macro sbc_p Parameter
+    sbc z: < (0 + (Parameter)) , x
 .endmacro
 
-.macro addalp parameter
-    lda AL
-    addapa parameter
-    sta AL
-.endmacro
-
-.macro addahp parameter
-    lda AH
-    addapa parameter
-    sta AH
-.endmacro
-
-.macro addblp parameter
-    lda BL
-    addapa parameter
-    sta BL
-.endmacro
-
-.macro addbhp parameter
-    lda BH
-    addapa parameter
-    sta DH
-.endmacro
-
-.macro addclp parameter
-    lda CL
-    addapa parameter
-    sta CL
-.endmacro
-
-.macro addchp parameter
-    lda CH
-    addapa parameter
-    sta CH
-.endmacro
-
-.macro adddlp parameter
-    lda DL
-    addapa parameter
-    sta DL
-.endmacro
-
-.macro adddhp parameter
-    lda DH
-    addapa parameter
-    sta DH
-.endmacro
-
-.macro subapa parameter
+.macro sub_p Parameter
     sec
-    sbcapa p_size
+    sbc_p (Parameter)
 .endmacro
 
-.macro cmpclp parameter
-    lda CL
-    cmpap parameter
+; ==============================================================================
+; Synthetic instructions - Parameters operations Byte
+; ==============================================================================
+
+;;; summary: Arithmic Shift Left Parameter
+;;; result: @parameter <- @parameter << 1
+;;; changed: N+ Z+
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro asl_p_b Parameter
+    asl z: < (0 + (Parameter)) , x
+.endmacro
+
+;;; summary: DECrement Parameter
+;;; result: @parameter <- @parameter - 1
+;;; changed: N+ Z+
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro dec_p_b Parameter
+    dec z: < (0 + (Parameter)) , x
+.endmacro
+
+;;; summary: INCrement Parameter
+;;; result: @parameter <- @parameter + 1
+;;; changed: N+ Z+
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro inc_p_b Parameter
+    inc z: < (0 + (Parameter)) , x
+.endmacro
+
+;;; summary: Logical Shift Right Parameter (unsigned)
+;;; result: @parameter <- @parameter >>1
+;;; changed: N+ Z+
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro lsr_p_b Parameter
+    lsr z: < (0 + (Parameter)) , x
+.endmacro
+
+;;; summary: ROtate Left Parameter
+;;; result: C <- @parameter[76543210] <- C
+;;; changed: N+ C+ Z+
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro rol_p_b Parameter
+    rol z: < (0 + (Parameter)) , x
+.endmacro
+
+;;; summary: ROtate Right Parameter
+;;; result: C -> @parameter[76543210] -> C
+;;; changed: N+ C+ Z+
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro ror_p_b Parameter
+    ror z: < (0 + (Parameter)) , x
+.endmacro
+
+; ==============================================================================
+; Synthetic instructions - Parameters operations Word
+; ==============================================================================
+
+.macro asl_p_w Parameter
+    asl z: < (0 + (Parameter)) , x
+    rol z: < (1 + (Parameter)) , x
+.endmacro
+
+;;; notes:
+;;;   Expensive, but we cannot use registers
+.macro dec_p_w Parameter
+    inc z: < (0 + (Parameter)) , x
+    dec z: < (0 + (Parameter)) , x
+    bne :+
+        dec z: < (1 + (Parameter)) , x
+    :
+    dec z: < (0 + (Parameter)) , x
+.endmacro
+
+.macro inc_p_w Parameter
+    inc z: < (0 + (Parameter)) , x
+    bne :+
+    inc z: < (1 + (Parameter)) , x
+    :
+.endmacro
+
+.macro lsr_p_w Parameter
+    lsr z: < (0 + (Parameter)) , x
+    ror z: < (1 + (Parameter)) , x
+.endmacro
+
+;;; summary: ROtate Left Parameter
+;;; result: C <- @parameter[76543210] <- C
+;;; changed: N+ C+ Z+
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro rol_p_w Parameter
+    rol z: < (0 + (Parameter)) , x
+    rol z: < (1 + (Parameter)) , x
+.endmacro
+
+;;; summary: ROtate Right Parameter
+;;; result: C -> @parameter[76543210] -> C
+;;; changed: N+ C+ Z+
+;;; notes: Assumes X is cached [FP]/[RSP]
+.macro ror_p_w Parameter
+    ror z: < (0 + (Parameter)) , x
+    ror z: < (1 + (Parameter)) , x
 .endmacro
 
 ; ==============================================================================

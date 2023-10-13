@@ -24,8 +24,7 @@
 ; ==============================================================================
 
 ;;; summary: Begin frame
-;;; result: X = [RSP] = [FP] , Y = [FSP]
-;;; changed: P.N=+, P.Z=0
+;;; changed: X=RSP=FP Y=FSP N+ Z0
 ;;; bytes: 12
 ;;; cycles: 21
 ;;; notes:
@@ -40,8 +39,7 @@
 .endmacro
 
 ;;; summary: End frame
-;;; result: X = [FP], Y = [FSP]
-;;; changed: P.N=+, P.Z=0
+;;; changed: X=RSP=FP Y=FSP N+ Z0
 ;;; bytes: 12
 ;;; cycles: 21
 ;;; notes:
