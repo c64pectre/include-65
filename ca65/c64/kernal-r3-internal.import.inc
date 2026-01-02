@@ -93,6 +93,7 @@
 .importzp ZPKERNAL_GDBLN
 .importzp ZPKERNAL_BLNON
 .importzp ZPKERNAL_CRSW
+.importzp ZPKERNAL_PNT
 .importzp ZPKERNAL_PNT_LO
 .importzp ZPKERNAL_PNT_HI
 .importzp ZPKERNAL_PNTR
@@ -311,6 +312,26 @@
 .import KERNAL_NCLALL
 .import KERNAL_NLOAD
 .import KERNAL_NSAVE
+
+;endregion
+
+;region IEC handlers
+
+.import KERNAL_INTERNAL_CHANNEL_CLSEI
+.import KERNAL_INTERNAL_CHANNEL_OPENI
+
+.import KERNAL_INTERNAL_SERIAL_ACPTR
+.import KERNAL_INTERNAL_SERIAL_TALK
+.import KERNAL_INTERNAL_SERIAL_TKSA
+.import KERNAL_INTERNAL_SERIAL_UNTLK
+
+;endregion
+
+; IRQ NMI BRK handlers
+
+.import KERNAL_INTERNAL_KEY                                 ; IRQ handler, see KERNAL_CINV
+.import KERNAL_INTERNAL_NNMI                                ; NMI handler, see KERNAL_NMINV
+.import KERNAL_INTERNAL_TIMB                                ; BRK handler, see KERNAL_CBINV
 
 ;endregion
 

@@ -18,13 +18,15 @@
 
 ;;; summary: C64 memory map
 
-.export ZEROPAGE_BASE                 := $0000
+.exportzp ZEROPAGE_BASE               := $00
+
 .export STACK_BASE                    := $0100
 .export KERNAL_BASIC_RAM_BASE         := $0200
 .export SCREEN_TEXT_RAM_BASE          := $0400
 .export BASIC_RAM_BASE                := $0800
+.export VIC_CHARACTER_ROM_BASE        := $1000              ; Offset within VIC bank
 .export VIC_CHARACTER_ROM_BANK_0_BASE := $1000
-.export VIC_CHARACTER_ROM_BANK_1_BASE := $9000
+.export VIC_CHARACTER_ROM_BANK_3_BASE := $9000
 .export BASIC_ROM_BASE                := $A000
 .export UPPER_RAM_BASE                := $C000
 .export IO_AREA_BASE                  := $D000

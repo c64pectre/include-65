@@ -72,6 +72,7 @@ SID_PAGE_FIRST                      = $D4
 SID_PAGE_LAST                       = $D7
 SID_PAGE_COUNT                      = SID_PAGE_LAST - SID_PAGE_FIRST + 1
 
+SCREEN_COLOR_RAM_SIZE               = $0400
 SCREEN_COLOR_RAM_PAGE_FIRST         = $D8
 SCREEN_COLOR_RAM_PAGE_LAST          = $DB
 SCREEN_COLOR_RAM_PAGE_COUNT         = SCREEN_COLOR_RAM_PAGE_LAST - SCREEN_COLOR_RAM_PAGE_FIRST + 1
@@ -80,11 +81,13 @@ CIA_1_PAGE                          = $DC
 CIA_1_PAGE_FIRST                    = CIA_1_PAGE
 CIA_1_PAGE_LAST                     = CIA_1_PAGE
 CIA_1_PAGE_COUNT                    = 1
+PAGE_CIA_1                          = CIA_1_PAGE
 
 CIA_2_PAGE                          = $DD
 CIA_2_PAGE_FIRST                    = CIA_2_PAGE
 CIA_2_PAGE_LAST                     = CIA_2_PAGE
 CIA_2_PAGE_COUNT                    = 1
+PAGE_CIA_2                          = CIA_2_PAGE
 
 IO_AREA_1_PAGE                      = $DE
 IO_AREA_1_PAGE_FIRST                = IO_AREA_1_PAGE

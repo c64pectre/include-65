@@ -40,7 +40,7 @@
 .exportzp ZPBASIC_TEMPPT                        := $16
 .exportzp ZPBASIC_LASTPT_LO                     := $17
 .exportzp ZPBASIC_LASTPT_HI                     := $18
-.exportzp ZPBASIC_TEMPST                        := $19
+.exportzp ZPBASIC_TEMPST                        := $19 ; $19-$21
 .exportzp ZPBASIC_INDEX_LO_INDEX1_LO            := $22
 .exportzp ZPBASIC_INDEX_HI_INDEX1_HI            := $23
 .exportzp ZPBASIC_INDEX2_LO                     := $24
@@ -122,12 +122,12 @@
 .exportzp ZPBASIC_FACOV                         := $70
 .exportzp ZPBASIC_BUFPTR_LO_CURTOL_LO_FBUFPT_LO_POLYPT_LO_STRNG2_LO := $71
 .exportzp ZPBASIC_BUFPTR_HI_CURTOL_HI_FBUFPT_HI_POLYPT_HI_STRNG2_HI := $72
-.exportzp ZPBASIC_CHRGET                        := $73
+.exportzp ZPBASIC_CHRGET                        := $73 ; $72-$8A
 .exportzp ZPBASIC_CHRGOT                        := $79
 .exportzp ZPBASIC_TXTPTR                        := $7A
 .exportzp ZPBASIC_QNUM                          := $80
 .exportzp ZPBASIC_CHRRTS                        := $8A
-.exportzp ZPBASIC_RNDX                          := $8B
+.exportzp ZPBASIC_RNDX                          := $8B ; $8B-$8F
 
 .export BVECTORS_IERROR    := $0300
 .export BVECTORS_IERROR_LO := BVECTORS_IERROR + 0

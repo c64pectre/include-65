@@ -44,7 +44,7 @@ VIC_CONTROL_1_DEN_CLR      = %11101111
 VIC_CONTROL_1_DEN_SET      = %00010000
 VIC_CONTROL_1_DEN_SET_SHOW = %00010000
 VIC_CONTROL_1_DEN_SET_HIDE = %00000000
-; RSEL: Row SELect (number oftext mode rows) 0=24 , 1 = 25
+; RSEL: Row SELect (number of text mode rows) 0=24 , 1 = 25
 VIC_CONTROL_1_RSEL_BIT     = 3
 VIC_CONTROL_1_RSEL_CLR     = %11110111
 VIC_CONTROL_1_RSEL_SET     = %00001000
@@ -83,10 +83,11 @@ VIC_CONTROL_2_XSCROLL_SET  = %00000111
 ; +-------+-------+-------+-------+-------+-------+-------+-------+
 ; |   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
 ; +-------+-------+-------+-------+-------+-------+-------+-------+
-; | VM.13 | VM.12 | VM.11 | VM.10 | CB.13 | CB.12 | CB.11 |   -   |
+; | VM.13 | VM.12 | VM.11 | VM.10 | CB.13 | CB.12 | CB.11 |   1   |
 ; +-------+-------+-------+-------+-------+-------+-------+-------+
 ; VM = Video Matrix for text mode bit 10-13 (1KB blocks)
 ; CB = Character Base bit 11-13 (2KB blocks)
+; Bit 0 seems always to be 1.
 VIC_MP_VM_SET = %11110000
 VIC_MP_VM_CLR = %00001111
 VIC_MP_CB_SET = %00001110

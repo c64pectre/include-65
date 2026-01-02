@@ -119,7 +119,7 @@
 .export VIC_M6C       := VIC_R2D ; Color sprite 6
 .export VIC_M7C       := VIC_R2E ; Color sprite 7
 
-.export VIC_BANK_0_BASE := $0000
+.export VIC_BANK_0_BASE : absolute := $0000
 .export VIC_BANK_1_BASE := $4000
 .export VIC_BANK_2_BASE := $8000
 .export VIC_BANK_3_BASE := $C000

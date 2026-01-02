@@ -20,6 +20,6 @@
     __C64_MEMORY_MAP_INC__ = 1
 
     .include "./memory-map.import.inc"
-    .include "../a65/c64/memory-map.inc"
+    .include "../../a65/c64/memory-map.inc"
 
 .endif

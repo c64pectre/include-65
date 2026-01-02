@@ -92,6 +92,7 @@
 .exportzp ZPKERNAL_CRSW                 := $D0
 .exportzp ZPKERNAL_PNT_LO               := $D1
 .exportzp ZPKERNAL_PNT_HI               := $D2
+.exportzp ZPKERNAL_PNT                  := ZPKERNAL_PNT_LO
 .exportzp ZPKERNAL_PNTR                 := $D3
 .exportzp ZPKERNAL_QTSW                 := $D4
 .exportzp ZPKERNAL_LNMX                 := $D5
@@ -308,5 +309,25 @@
 .export KERNAL_NCLALL := $F32F
 .export KERNAL_NLOAD  := $F4A5
 .export KERNAL_NSAVE  := $F5ED
+
+;endregion
+
+;region IEC handlers
+
+.export KERNAL_INTERNAL_CHANNEL_CLSEI = $F642
+.export KERNAL_INTERNAL_CHANNEL_OPENI = $F3D5
+
+.export KERNAL_INTERNAL_SERIAL_ACPTR = $EE13
+.export KERNAL_INTERNAL_SERIAL_TALK  = $ED09
+.export KERNAL_INTERNAL_SERIAL_TKSA  = $EDC7
+.export KERNAL_INTERNAL_SERIAL_UNTLK = $EDEF
+
+;endregion
+
+; IRQ NMI BRK handlers
+
+.export KERNAL_INTERNAL_KEY  = $EA31            ; IRQ handler, see KERNAL_CINV
+.export KERNAL_INTERNAL_NNMI = $FE47            ; NMI handler, see KERNAL_NMINV
+.export KERNAL_INTERNAL_TIMB = $FE66            ; BRK handler, see KERNAL_CBINV
 
 ;endregion
