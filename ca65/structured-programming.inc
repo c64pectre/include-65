@@ -64,6 +64,8 @@
     _then:
 .endmacro
 
+;;; summary: if Carry Clear (C=0) then
+;;; notes: Same as `if_lt_then`
 .macro if_cc_then scope
     .scope scope
     _if:
@@ -71,6 +73,8 @@
     _then:
 .endmacro
 
+;;; summary: if Carry Set (C=1) then
+;;; notes: Same as `if_ge_then`
 .macro if_cs_then scope
     .scope scope
     _if:
@@ -106,6 +110,8 @@
     _then:
 .endmacro
 
+;;; summary: if Less Than (C=0) then
+;;; notes: Same as `if_cc_then`
 .macro if_lt_then scope
     .scope scope
     _if:
@@ -113,6 +119,8 @@
     _then:
 .endmacro
 
+;;; summary: if Greater or Equal than (C=1) then
+;;; notes: Same as `if_cs_then`
 .macro if_ge_then scope
     .scope scope
     _if:
@@ -150,6 +158,12 @@
 .macro loop_next
     _loop:
     _next:
+.endmacro
+
+.macro next_end
+    _next:
+    _end:
+    .endscope
 .endmacro
 
 ;;; summary: switch-case-end
