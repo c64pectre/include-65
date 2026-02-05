@@ -221,7 +221,12 @@
 .export KVECTORS_ISAVE_LO  := $0332
 .export KVECTORS_ISAVE_HI  := $0333
 
+;;; summary: Datasette/tape buffer $033C-$03FB (192 bytes)
 .export KERNAL_TBUFFR := $033C
+.export KERNAL_UNUSED_03FC = $03FC
+.export KERNAL_UNUSED_03FD = $03FD
+.export KERNAL_UNUSED_03FE = $03FE
+.export KERNAL_UNUSED_03FF = $03FF
 
 .export MESSAGES_MS1   := $F0BD
 .export MESSAGES_MS5   := $F0C9

@@ -88,21 +88,53 @@
 
 ; Initialized by vector from table vectss
 .import KERNAL_CINV
+.import KERNAL_CINV_LO
+.import KERNAL_CINV_HI
 .import KERNAL_CBINV
+.import KERNAL_CBINV_LO
+.import KERNAL_CBINV_HI
 .import KERNAL_NMINV
+.import KERNAL_NMINV_LO
+.import KERNAL_NMINV_HI
 .import KERNAL_IOPEN
+.import KERNAL_IOPEN_LO
+.import KERNAL_IOPEN_HI
 .import KERNAL_ICLOSE
+.import KERNAL_ICLOSE_LO
+.import KERNAL_ICLOSE_HI
 .import KERNAL_ICHKIN
+.import KERNAL_ICHKIN_LO
+.import KERNAL_ICHKIN_HI
 .import KERNAL_ICKOUT
+.import KERNAL_ICKOUT_LO
+.import KERNAL_ICKOUT_HI
 .import KERNAL_ICLRCH
+.import KERNAL_ICLRCH_LO
+.import KERNAL_ICLRCH_HI
 .import KERNAL_IBASIN
+.import KERNAL_IBASIN_LO
+.import KERNAL_IBASIN_HI
 .import KERNAL_IBSOUT
+.import KERNAL_IBSOUT_LO
+.import KERNAL_IBSOUT_HI
 .import KERNAL_ISTOP
+.import KERNAL_ISTOP_LO
+.import KERNAL_ISTOP_HI
 .import KERNAL_IGETIN
+.import KERNAL_IGETIN_LO
+.import KERNAL_IGETIN_HI
 .import KERNAL_ICLALL
+.import KERNAL_ICLALL_LO
+.import KERNAL_ICLALL_HI
 .import KERNAL_USRCMD
+.import KERNAL_USRCMD_LO
+.import KERNAL_USRCMD_HI
 .import KERNAL_ILOAD
+.import KERNAL_ILOAD_LO
+.import KERNAL_ILOAD_HI
 .import KERNAL_ISAVE
+.import KERNAL_ISAVE_LO
+.import KERNAL_ISAVE_HI
 
 ; ==============================================================================
 ; End of Kernal revision 3 Public interface

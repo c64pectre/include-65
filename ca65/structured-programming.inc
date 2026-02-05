@@ -206,4 +206,9 @@
     .endscope
 .endmacro
 
+.macro catch_finally
+    _catch:
+    _finally:
+.endmacro
+
 .endif

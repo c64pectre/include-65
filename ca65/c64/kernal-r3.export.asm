@@ -84,22 +84,54 @@
 ; ==============================================================================
 
 ; Initialized by vector from table vectss
-.export KERNAL_CINV   = $0314    ; irq ram vector                  (2 bytes $0314-$0315 default key    = $EA31)
-.export KERNAL_CBINV  = $0316    ; brk instr ram vector            (2 bytes $0316-$0317 default timb   = $FE66)
-.export KERNAL_NMINV  = $0318    ; nmi ram vector                  (2 bytes $0318-$0319 default nnmi   = $FE47)
-.export KERNAL_IOPEN  = $031A    ; indirects for code              (2 bytes $031A-$031B default nopen  = $F34A)
-.export KERNAL_ICLOSE = $031C    ; conforms to kernal spec 8/19/80 (2 bytes $031C-$031D default nclose = $F291)
-.export KERNAL_ICHKIN = $031E    ;                                 (2 bytes $031E-$031F default nchkin = $F20E)
-.export KERNAL_ICKOUT = $0320    ;                                 (2 bytes $0320-$0321 default nckout = $F250)
-.export KERNAL_ICLRCH = $0322    ;                                 (2 bytes $0322-$0323 default nclrch = $F333)
-.export KERNAL_IBASIN = $0324    ;                                 (2 bytes $0324-$0325 default nbasin = $F157)
-.export KERNAL_IBSOUT = $0326    ;                                 (2 bytes $0326-$0327 default nbsout = $F1CA)
-.export KERNAL_ISTOP  = $0328    ;                                 (2 bytes $0328-$0329 default nstop  = $F6ED)
-.export KERNAL_IGETIN = $032A    ;                                 (2 bytes $032A-$032B default ngetin = $F13E)
-.export KERNAL_ICLALL = $032C    ;                                 (2 bytes $032C-$032D default nclall = $F32F)
-.export KERNAL_USRCMD = $032E    ;                                 (2 bytes $032E-$032F default timb   = $FE66)
-.export KERNAL_ILOAD  = $0330    ;                                 (2 bytes $0330-$0331 default nload  = $F4A5)
-.export KERNAL_ISAVE  = $0332    ; savesp                          (2 bytes $0332-$0333 default nsave  = $F5ED)
+.export KERNAL_CINV      = $0314                ; (2 bytes $0314-$0315 default key    = $EA31) irq ram vector
+.export KERNAL_CINV_LO   = KERNAL_CINV
+.export KERNAL_CINV_HI   = KERNAL_CINV + 1
+.export KERNAL_CBINV     = $0316                ; (2 bytes $0316-$0317 default timb   = $FE66) brk instr ram vector
+.export KERNAL_CBINV_LO  = KERNAL_CBINV
+.export KERNAL_CBINV_HI  = KERNAL_CBINV + 1
+.export KERNAL_NMINV     = $0318                ; (2 bytes $0318-$0319 default nnmi   = $FE47) nmi ram vector
+.export KERNAL_NMINV_LO  = KERNAL_NMINV
+.export KERNAL_NMINV_HI  = KERNAL_NMINV + 1
+.export KERNAL_IOPEN     = $031A                ; (2 bytes $031A-$031B default nopen  = $F34A) indirects for code
+.export KERNAL_IOPEN_LO  = KERNAL_IOPEN
+.export KERNAL_IOPEN_HI  = KERNAL_IOPEN + 1
+.export KERNAL_ICLOSE    = $031C                ; (2 bytes $031C-$031D default nclose = $F291) conforms to kernal spec 8/19/80
+.export KERNAL_ICLOSE_LO = KERNAL_ICLOSE
+.export KERNAL_ICLOSE_HI = KERNAL_ICLOSE + 1
+.export KERNAL_ICHKIN    = $031E                ; (2 bytes $031E-$031F default nchkin = $F20E)
+.export KERNAL_ICHKIN_LO = KERNAL_ICHKIN
+.export KERNAL_ICHKIN_HI = KERNAL_ICHKIN + 1
+.export KERNAL_ICKOUT    = $0320                ; (2 bytes $0320-$0321 default nckout = $F250)
+.export KERNAL_ICKOUT_LO = KERNAL_ICKOUT
+.export KERNAL_ICKOUT_HI = KERNAL_ICKOUT + 1
+.export KERNAL_ICLRCH    = $0322                ; (2 bytes $0322-$0323 default nclrch = $F333)
+.export KERNAL_ICLRCH_LO = KERNAL_ICLRCH
+.export KERNAL_ICLRCH_HI = KERNAL_ICLRCH + 1
+.export KERNAL_IBASIN    = $0324                ; (2 bytes $0324-$0325 default nbasin = $F157)
+.export KERNAL_IBASIN_LO = KERNAL_IBASIN
+.export KERNAL_IBASIN_HI = KERNAL_IBASIN + 1
+.export KERNAL_IBSOUT    = $0326                ; (2 bytes $0326-$0327 default nbsout = $F1CA)
+.export KERNAL_IBSOUT_LO = KERNAL_IBSOUT
+.export KERNAL_IBSOUT_HI = KERNAL_IBSOUT + 1
+.export KERNAL_ISTOP     = $0328                ; (2 bytes $0328-$0329 default nstop  = $F6ED)
+.export KERNAL_ISTOP_LO  = KERNAL_ISTOP
+.export KERNAL_ISTOP_HI  = KERNAL_ISTOP + 1
+.export KERNAL_IGETIN    = $032A                ; (2 bytes $032A-$032B default ngetin = $F13E)
+.export KERNAL_IGETIN_LO = KERNAL_IGETIN
+.export KERNAL_IGETIN_HI = KERNAL_IGETIN + 1
+.export KERNAL_ICLALL    = $032C                ; (2 bytes $032C-$032D default nclall = $F32F)
+.export KERNAL_ICLALL_LO = KERNAL_ICLALL
+.export KERNAL_ICLALL_HI = KERNAL_ICLALL + 1
+.export KERNAL_USRCMD    = $032E                ; (2 bytes $032E-$032F default timb   = $FE66)
+.export KERNAL_USRCMD_LO = KERNAL_USRCMD
+.export KERNAL_USRCMD_HI = KERNAL_USRCMD + 1
+.export KERNAL_ILOAD     = $0330                ; (2 bytes $0330-$0331 default nload  = $F4A5)
+.export KERNAL_ILOAD_LO  = KERNAL_ILOAD
+.export KERNAL_ILOAD_HI  = KERNAL_ILOAD + 1
+.export KERNAL_ISAVE     = $0332                ; (2 bytes $0332-$0333 default nsave  = $F5ED) savesp
+.export KERNAL_ISAVE_LO  = KERNAL_ISAVE
+.export KERNAL_ISAVE_HI  = KERNAL_ISAVE + 1
 
 ; ==============================================================================
 ; End of Kernal revision 3 Public interface
