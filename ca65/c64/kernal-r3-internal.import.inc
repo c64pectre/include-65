@@ -122,10 +122,20 @@
 ; ==============================================================================
 
 .import KVAR_BUF_BUFOFS
+.import KVAR_BUF_BUFOFS_LAST
+.importzp KVAR_BUF_BUFOFS_SIZE
 .import KVAR_LAT
+.import KVAR_LAT_LAST
+.importzp KVAR_LAT_SIZE
 .import KVAR_FAT
+.import KVAR_FAT_LAST
+.importzp KVAR_FAT_SIZE
 .import KVAR_SAT
+.import KVAR_SAT_LAST
+.importzp KVAR_SAT_SIZE
 .import KVAR_KEYD
+.import KVAR_KEYD_LAST
+.importzp KVAR_KEYD_SIZE
 .import KVAR_MEMSTR
 .import KVAR_MEMSTR_LO
 .import KVAR_MEMSTR_HI
@@ -170,6 +180,9 @@
 .import KVAR_STUPID
 .import KVAR_LINTMP
 .import KVAR_PALNTS
+.import KVAR_UNUSED_1
+.import KVAR_UNUSED_1_LAST
+.importzp KVAR_UNUSED_1_SIZE
 
 ; ==============================================================================
 ; Constants KVECTORS
@@ -224,11 +237,15 @@
 .import KVECTORS_ISAVE_LO
 .import KVECTORS_ISAVE_HI
 
+.import KVAR_UNUSED_2
+.import KVAR_UNUSED_2_LAST
+.importzp KVAR_UNUSED_2_SIZE
 .import KERNAL_TBUFFR
-.import KERNAL_UNUSED_03FC
-.import KERNAL_UNUSED_03FD
-.import KERNAL_UNUSED_03FE
-.import KERNAL_UNUSED_03FF
+.import KERNAL_TBUFFR_LAST
+.importzp KERNAL_TBUFFR_SIZE
+.import KVAR_UNUSED_3
+.import KVAR_UNUSED_3_LAST
+.importzp KVAR_UNUSED_3_SIZE
 
 .import MESSAGES_MS1
 .import MESSAGES_MS5
